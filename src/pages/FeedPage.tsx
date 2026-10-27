@@ -8,6 +8,7 @@ import { TopBar } from '@/components/organisms/TopBar';
 import { BookExplorerModal } from '@/components/organisms/BookExplorerModal';
 import { ProfileModal } from '@/components/organisms/ProfileModal';
 import { WelcomeModal } from '@/components/organisms/WelcomeModal';
+import { AuthModal } from '@/components/organisms/AuthModal';
 import {
   getFeedVerses,
   getVersesByBookAndChapter,
@@ -30,6 +31,13 @@ import {
   type UserProfileData,
 } from '@/services/streakService';
 import { Loader2 } from 'lucide-react';
+import {
+  getCurrentAuthUser,
+  signOutUser,
+  onAuthStateChange,
+  syncLocalDataToSupabase,
+} from '@/services/authService';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export const FeedPage: React.FC = () => {
   const [verses, setVerses] = useState<Verse[]>([]);
@@ -75,6 +83,11 @@ export const FeedPage: React.FC = () => {
   const [activeVerseForNotes, setActiveVerseForNotes] = useState<Verse | null>(null);
   const [isExplorerOpen, setIsExplorerOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalInitialView, setAuthModalInitialView] = useState<'login' | 'register' | 'recovery'>('register');
+
+  // Estado de usuario en Supabase (invitado o registrado)
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
 
   const feedContainerRef = useRef<HTMLDivElement>(null);
   const isFetchingMoreRef = useRef<boolean>(false);
@@ -104,6 +117,23 @@ export const FeedPage: React.FC = () => {
       applyTheme(theme === 'dark');
     }
   }, [theme]);
+
+  // Escuchar y sincronizar estado de autenticacion de Supabase
+  useEffect(() => {
+    getCurrentAuthUser().then((user) => {
+      setCurrentUser(user);
+    });
+
+    const unsubscribe = onAuthStateChange((user) => {
+      setCurrentUser(user);
+      setStreakData(getReadingStreakData());
+      setUserProfile(getUserProfile());
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Carga inicial de versiculos segun ultima lectura o inicio
   const loadInitialVerses = useCallback(async (version: string) => {
@@ -241,6 +271,28 @@ export const FeedPage: React.FC = () => {
     };
     setUserProfile(updated);
     saveUserProfile(updated);
+    if (currentUser) {
+      syncLocalDataToSupabase(currentUser.id, newName);
+    }
+  };
+
+  // Autenticacion progresiva con Supabase
+  const handleOpenAuth = (view: 'login' | 'register' | 'recovery' = 'register') => {
+    setAuthModalInitialView(view);
+    setIsAuthModalOpen(true);
+  };
+
+  const handleAuthSuccess = (_user: SupabaseUser) => {
+    setIsAuthModalOpen(false);
+    setStreakData(getReadingStreakData());
+    setUserProfile(getUserProfile());
+  };
+
+  const handleSignOut = async () => {
+    await signOutUser();
+    setCurrentUser(null);
+    setUserProfile(getUserProfile());
+    setStreakData(getReadingStreakData());
   };
 
   // Cierre de bienvenida diaria
@@ -513,10 +565,12 @@ export const FeedPage: React.FC = () => {
         userName={userProfile.name}
         streak={streakData.currentStreak}
         isStreakCompletedToday={isStreakCompletedToday}
+        isRegisteredUser={Boolean(currentUser && !currentUser.is_anonymous)}
         weeklyDays={weeklyDays}
         lastReading={lastReading}
         onClose={handleCloseWelcome}
         onResumeReading={handleCloseWelcome}
+        onOpenAuth={(view) => handleOpenAuth(view)}
       />
 
       {/* Modal de Notas y Reflexiones (Bottom Sheet) */}
@@ -542,6 +596,7 @@ export const FeedPage: React.FC = () => {
       <ProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
+        currentUser={currentUser}
         streakData={streakData}
         weeklyDays={weeklyDays}
         userProfile={userProfile}
@@ -554,8 +609,18 @@ export const FeedPage: React.FC = () => {
         onSelectVersion={handleSelectVersion}
         onSelectFontSize={handleFontSizeChange}
         onSelectTheme={handleSelectTheme}
+        onOpenAuth={(view) => handleOpenAuth(view)}
+        onSignOut={handleSignOut}
         onNavigateToVerse={handleNavigateToSavedVerse}
         onRemoveBookmark={handleRemoveBookmark}
+      />
+
+      {/* Modal de Autenticacion Progresiva (Registro / Inicio de Sesion / Recuperacion) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        initialView={authModalInitialView}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
       />
     </div>
   );

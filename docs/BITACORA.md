@@ -131,6 +131,25 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
     * Cuatro pestanas funcionales: "Racha & Habitos" (con calendario semanal e insignias de constancia desbloqueables), "Guardados" (coleccion con salto al versiculo y borrado), "Reflexiones" (historial de meditaciones personales y comunitarias) y "Ajustes" (tema, tamano de tipografia y version biblica).
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Autenticacion Progresiva y Respaldo en la Nube con Supabase (Hito 6.10 - Rama feature/auth-perfil-supabase)**:
+  * Creacion y aislamiento de la rama de trabajo `feature/auth-perfil-supabase` en GitHub.
+  * Definicion del esquema de datos en `supabase/migrations/20261027010000_create_profiles_and_streaks.sql`:
+    * Tabla `user_profiles` con relacion a `auth.users(id)`, nombre mostrado, color de avatar, meta diaria, tema y preferencias tipograficas, con politicas RLS individuales y funcion de actualizacion `handle_updated_at`.
+    * Tabla `user_streaks` con relacion a `auth.users(id)`, racha actual, racha record, fecha de ultima lectura, total de versiculos leidos e historial de fechas (`history_dates`), protegida con RLS.
+    * Trigger de aprovisionamiento automatico `tr_on_auth_user_created` que inicializa el perfil y la racha al registrar un usuario en `auth.users`.
+  * Implementacion del servicio de autenticacion en `src/services/authService.ts`:
+    * Metodos de registro (`signUpWithEmail`), inicio de sesion (`signInWithEmail`), cierre de sesion (`signOutUser`), recuperacion de contraseña (`sendPasswordReset`) y escucha reactiva (`onAuthStateChange`).
+    * Motor de migracion progresiva (`syncLocalDataToSupabase`): traslada de manera transparente la racha acumulada, versiculos leidos y configuraciones locales hacia Supabase al crear cuenta o iniciar sesion, evitando que el usuario pierda su progreso previo como invitado.
+    * Descarga y sincronizacion (`fetchUserDataFromSupabase`) al reanudar sesion en cualquier dispositivo.
+  * Creacion del componente de autenticacion no intrusivo `AuthModal.tsx`:
+    * Tres vistas integradas: Registro, Inicio de Sesion y Recuperacion de Contraseña con transiciones fluidas.
+    * Diseno sobrio adaptado a tema Claro y Oscuro, mensajes contextuales de error y exito, spinner de carga e indicador de valor sutil ("Respalda tu racha, tus notas y versiculos en todos tus dispositivos").
+  * Integracion en la interfaz de usuario:
+    * `ProfileModal.tsx`: incorporacion de banner sutil de respaldo para usuarios invitados, visualizacion del correo electronico del usuario autenticado, estado de cuenta sincronizada y boton de cierre de sesion.
+    * `WelcomeModal.tsx`: enlace no intrusivo para respaldar el avance en la nube sin entorpecer el acceso directo al texto biblico.
+    * `FeedPage.tsx`: conexion completa de estados de autenticacion, oyente en tiempo real de sesion y sincronizacion bidireccional.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
@@ -147,6 +166,7 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 * **ADR-013 (Soporte de Temas Editorial Dual con Deteccion de Sistema):** Implementacion de dos temas de alta legibilidad (Claro en tono papel `#f8f7f4` y Oscuro en obsidiana `#131315`) persistidos en `localStorage` y conmutables mediante conmutador en cabecera o selector de sistema.
 * **ADR-014 (Motor de Racha Diaria con Calendario Semanal y Deteccion de Continuidad):** El registro de racha computa fechas locales consecutivas y actualiza en tiempo real el progreso de 7 dias, recompensando la constancia diaria sin bloqueos de conexion y persistiendo de forma progresiva.
 * **ADR-015 (Bienvenida Contextual Diaria no Intrusiva):** Despliegue de bienvenida una sola vez por jornada natural con versiculo inspiracional y estado de meta, facilitando la transicion directa al feed de lectura sin friccion.
+* **ADR-016 (Perfil Progresivo y Sincronizacion de Racha en la Nube con Supabase Auth):** El acceso y lectura de toda la Biblia permanece 100% abierto sin forzar registro previo. Los datos de lectura y racha se generan de inmediato de forma local; cuando el lector decide registrarse o iniciar sesion, una migracion silenciosa y transparente traslada todo su historial acumulado hacia Supabase (tablas `user_profiles` y `user_streaks`), permitiendo persistencia multi-dispositivo sin friccion de entrada.
 
 ---
 
