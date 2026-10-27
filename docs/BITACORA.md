@@ -95,6 +95,17 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
     * Adicion de `content-start` en la cuadricula de capitulos de `BookExplorerModal`: resuelve el espaciado vertical excesivo entre filas de capitulos al empaquetarlas ordenadamente desde arriba con un espaciado uniforme.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Eliminacion de Redundancias Visuales y Soporte Dual de Modo Claro y Oscuro (Hito 6.7)**:
+  * Limpieza editorial de `VerseCard`: se elimino la barra superior interna de la tarjeta de versiculos (pildora de capitulo y selector de traduccion) que colisionaba y duplicaba la informacion ya provista fijamente por la `TopBar`. El texto biblico queda centrado con mayor holgura tipografica, manteniendo la referencia del versiculo y contexto en el pie del bloque textual.
+  * Implementacion de soporte nativo para Modo Claro y Modo Oscuro:
+    * Configuracion en `src/index.css` con `@custom-variant dark (&:where(.dark, .dark *))` para conmutacion por clase CSS en la raiz del documento.
+    * Paleta de Modo Claro: tono papel marfil calido (`#f8f7f4`) para lectura diurna de alto confort, tinta profunda (`#18181b`) y acentos de contraste suave.
+    * Paleta de Modo Oscuro: obsidian profundo (`#131315`), blanco puro editorial y tarjetas en gris carbon (`#201f22`).
+    * Adaptacion completa de todos los componentes: `TopBar`, `VerseCard`, `VerseActionBar`, `IconButton`, `BookExplorerModal`, `ProfileModal` y `NotesModal`.
+    * Conmutador rapido Sol/Luna en `TopBar` para alternancia instantanea de un toque.
+    * Selector formal en `ProfileModal` con opciones de Oscuro, Claro y Deteccion automatica del Sistema (`window.matchMedia`).
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
@@ -107,6 +118,8 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 * **ADR-009 (Ingesta Masiva por Lotes con Upsert Resiliente):** La carga completa del canon biblico se ejecuto en lotes de 400 registros utilizando la clave service_role en el entorno de desarrollo y la clausula onConflict para prevenir duplicados y sobrecargas de red.
 * **ADR-010 (Navegacion Canónica y Paginacion Continua por Orden Global):** La seleccion de libro y capitulo calcula el primer versiculo de la seccion y extrae un bloque consecutivo a partir de `global_order`. Esto permite que el desplazamiento snap vertical no se detenga al culminar un capitulo, sino que continue de forma fluida hacia el capitulo subsiguiente.
 * **ADR-011 (Contencion Responsiva de Modales y Anclaje con Flex Shrink):** Se previene el desbordamiento vertical y el recorte de pies de pagina en pantallas con escalado DPI o menor resolucion vertical mediante cotas dinamicas `max-h-[calc(100dvh-2.5rem)]` y `min-h-0`. Se anclan todas las barras superior/inferior con `shrink-0` y se aplica `content-start` a las cuadriculas flex/grid para evitar distribuciones artificiales de espacio.
+* **ADR-012 (Desacoplamiento de Contexto Superior en Tarjetas):** La barra superior anclada `TopBar` es la unica responsable de proyectar el libro, capitulo y traduccion activa. Se retiran los duplicados internos en `VerseCard` para maximizar el area de lectura y evitar colisiones visuales en el desplazamiento snap.
+* **ADR-013 (Soporte de Temas Editorial Dual con Deteccion de Sistema):** Implementacion de dos temas de alta legibilidad (Claro en tono papel `#f8f7f4` y Oscuro en obsidiana `#131315`) persistidos en `localStorage` y conmutables mediante conmutador en cabecera o selector de sistema.
 
 ---
 

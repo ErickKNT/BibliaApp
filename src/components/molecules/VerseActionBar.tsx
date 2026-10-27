@@ -42,9 +42,10 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
         badge={likeCount > 0 ? likeCount : undefined}
       >
         <Heart
-          className={`h-6 w-6 transition-transform group-active:scale-125 ${
-            isLiked ? 'fill-black stroke-black' : 'stroke-current'
-          }`}
+          className={cn(
+            'h-6 w-6 transition-transform group-active:scale-125',
+            isLiked ? 'fill-current stroke-current' : 'stroke-current'
+          )}
         />
       </IconButton>
 
@@ -64,9 +65,10 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
         label="Guardar"
       >
         <Bookmark
-          className={`h-6 w-6 ${
-            isBookmarked ? 'fill-black stroke-black' : 'stroke-current'
-          }`}
+          className={cn(
+            'h-6 w-6',
+            isBookmarked ? 'fill-current stroke-current' : 'stroke-current'
+          )}
         />
       </IconButton>
 

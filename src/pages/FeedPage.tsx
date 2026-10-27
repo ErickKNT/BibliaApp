@@ -27,6 +27,11 @@ export const FeedPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
 
+  // Tema de apariencia (Modo Claro / Modo Oscuro / Sistema)
+  const [theme, setTheme] = useState<'dark' | 'light' | 'system'>(() => {
+    return (localStorage.getItem('biblia_theme') as 'dark' | 'light' | 'system') || 'dark';
+  });
+
   // Ajustes de lectura
   const [fontSize, setFontSize] = useState<'normal' | 'grande' | 'extra'>(() => {
     return (localStorage.getItem('biblia_font_size') as 'normal' | 'grande' | 'extra') || 'normal';
@@ -48,6 +53,32 @@ export const FeedPage: React.FC = () => {
 
   const feedContainerRef = useRef<HTMLDivElement>(null);
   const isFetchingMoreRef = useRef<boolean>(false);
+
+  // Sincronizar clase de tema con la raiz html
+  useEffect(() => {
+    const root = document.documentElement;
+
+    const applyTheme = (isDark: boolean) => {
+      if (isDark) {
+        root.classList.add('dark');
+        root.classList.remove('light');
+      } else {
+        root.classList.add('light');
+        root.classList.remove('dark');
+      }
+    };
+
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      applyTheme(mediaQuery.matches);
+
+      const listener = (e: MediaQueryListEvent) => applyTheme(e.matches);
+      mediaQuery.addEventListener('change', listener);
+      return () => mediaQuery.removeEventListener('change', listener);
+    } else {
+      applyTheme(theme === 'dark');
+    }
+  }, [theme]);
 
   // Carga inicial de versiculos segun ultima lectura o inicio
   const loadInitialVerses = useCallback(async (version: string) => {
@@ -103,7 +134,6 @@ export const FeedPage: React.FC = () => {
             if (id) {
               setActiveVerseId(id);
 
-              // Actualizar ultima lectura conforme el usuario avanza
               const active = verses.find((v) => v.id === id);
               if (active) {
                 const reading: LastReading = {
@@ -162,6 +192,18 @@ export const FeedPage: React.FC = () => {
   // Versiculo activo actualmente enfocado
   const activeVerse = verses.find((v) => v.id === activeVerseId) || verses[0];
 
+  // Alternar tema rapidamente
+  const handleToggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    localStorage.setItem('biblia_theme', next);
+  };
+
+  const handleSelectTheme = (newTheme: 'dark' | 'light' | 'system') => {
+    setTheme(newTheme);
+    localStorage.setItem('biblia_theme', newTheme);
+  };
+
   // Navegacion directa desde el Explorador de Libros
   const handleSelectBookAndChapter = async (
     bookOrder: number,
@@ -175,7 +217,6 @@ export const FeedPage: React.FC = () => {
       setVerses(newVerses);
       setActiveVerseId(newVerses[0].id);
 
-      // Reiniciar el scroll del feed hacia arriba
       if (feedContainerRef.current) {
         feedContainerRef.current.scrollTop = 0;
       }
@@ -195,7 +236,6 @@ export const FeedPage: React.FC = () => {
   const handleLikeToggle = async (verseId: string) => {
     const isCurrentlyLiked = likedVerseIds.has(verseId);
 
-    // Actualizacion optimista inmediata
     setLikedVerseIds((prev) => {
       const next = new Set(prev);
       if (isCurrentlyLiked) {
@@ -302,7 +342,6 @@ export const FeedPage: React.FC = () => {
     if (version === currentVersion) return;
     setCurrentVersion(version);
 
-    // Recargar versiculos a partir del libro y capitulo activo
     if (activeVerse) {
       setIsLoading(true);
       const reloaded = await getVersesByBookAndChapter(
@@ -324,7 +363,6 @@ export const FeedPage: React.FC = () => {
     localStorage.setItem('biblia_font_size', size);
   };
 
-  // Navegar a un versiculo guardado desde el Perfil
   const handleNavigateToSavedVerse = async (savedVerse: Verse) => {
     const existingIndex = verses.findIndex((v) => v.id === savedVerse.id);
 
@@ -339,7 +377,6 @@ export const FeedPage: React.FC = () => {
       }
     }
 
-    // Si no esta en el feed actual, cargar el capitulo correspondiente
     await handleSelectBookAndChapter(
       savedVerse.bookOrder,
       savedVerse.chapter,
@@ -348,12 +385,14 @@ export const FeedPage: React.FC = () => {
   };
 
   return (
-    <div className="relative h-full w-full bg-[#131315]">
-      {/* Barra superior fija */}
+    <div className="relative h-full w-full bg-[#f8f7f4] dark:bg-[#131315] text-[#18181b] dark:text-white transition-colors duration-200">
+      {/* Barra superior fija con soporte de tema claro/oscuro */}
       <TopBar
         currentVersion={currentVersion}
         activeBookName={activeVerse?.bookName || lastReading.bookName}
         activeChapter={activeVerse?.chapter || lastReading.chapter}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
         onOpenExplorer={() => setIsExplorerOpen(true)}
         onOpenProfile={() => setIsProfileOpen(true)}
         onVersionSelect={handleVersionCycle}
@@ -383,14 +422,14 @@ export const FeedPage: React.FC = () => {
 
       {/* Indicador de carga cuando se cambia de capitulo o libro */}
       {isLoading ? (
-        <div className="flex h-screen w-full flex-col items-center justify-center bg-[#131315] text-white">
-          <Loader2 className="h-8 w-8 animate-spin text-white/50 mb-3" />
-          <span className="text-sm font-semibold tracking-wide text-white/80">
+        <div className="flex h-screen w-full flex-col items-center justify-center bg-[#f8f7f4] dark:bg-[#131315] text-black/80 dark:text-white">
+          <Loader2 className="h-8 w-8 animate-spin text-black/40 dark:text-white/50 mb-3" />
+          <span className="text-sm font-semibold tracking-wide text-black/80 dark:text-white/80">
             Cargando escrituras...
           </span>
         </div>
       ) : (
-        /* Feed principal de scroll vertical snap */
+        /* Feed principal de scroll vertical snap: limpio y sin elementos redundantes */
         <FeedLayout ref={feedContainerRef}>
           {verses.map((verse) => (
             <VerseCard
@@ -402,14 +441,12 @@ export const FeedPage: React.FC = () => {
               isLiked={likedVerseIds.has(verse.id)}
               fontSize={fontSize}
               onLikeToggle={handleLikeToggle}
-              onVersionToggle={handleVersionCycle}
-              onChapterClick={() => setIsExplorerOpen(true)}
             />
           ))}
 
           {/* Indicador de carga progresiva al pie del feed */}
           {isLoadingMore && (
-            <div className="flex h-24 items-center justify-center bg-[#131315] text-white/50">
+            <div className="flex h-24 items-center justify-center bg-[#f8f7f4] dark:bg-[#131315] text-black/50 dark:text-white/50">
               <Loader2 className="h-5 w-5 animate-spin mr-2" />
               <span className="text-xs">Cargando siguientes versiculos...</span>
             </div>
@@ -436,7 +473,7 @@ export const FeedPage: React.FC = () => {
         onSelectBookAndChapter={handleSelectBookAndChapter}
       />
 
-      {/* Modal de Perfil, Guardados y Ajustes PWA */}
+      {/* Modal de Perfil, Guardados y Ajustes PWA con selector de tema */}
       <ProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
@@ -444,8 +481,10 @@ export const FeedPage: React.FC = () => {
         notes={notes}
         currentVersion={currentVersion}
         fontSize={fontSize}
+        theme={theme}
         onSelectVersion={handleSelectVersion}
         onSelectFontSize={handleFontSizeChange}
+        onSelectTheme={handleSelectTheme}
         onNavigateToVerse={handleNavigateToSavedVerse}
         onRemoveBookmark={handleRemoveBookmark}
       />

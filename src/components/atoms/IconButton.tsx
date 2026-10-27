@@ -22,21 +22,21 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       >
         <div
           className={cn(
-            'flex h-12 w-12 items-center justify-center rounded-full transition-all backdrop-blur-xl shadow-lg border border-white/5',
+            'flex h-12 w-12 items-center justify-center rounded-full transition-all backdrop-blur-xl shadow-lg border',
             active
-              ? 'bg-white text-black'
-              : 'bg-[#201f22]/90 text-white/90 hover:text-white hover:bg-[#2a2a2c] active:bg-[#353437]'
+              ? 'bg-[#18181b] text-white dark:bg-white dark:text-black shadow-md'
+              : 'bg-white/90 text-black/90 hover:bg-[#edece6] border-black/10 dark:bg-[#201f22]/90 dark:text-white/90 dark:hover:bg-[#2a2a2c] dark:border-white/5'
           )}
         >
           {children}
         </div>
         {label && (
-          <span className="text-[11px] font-medium tracking-tight text-white/70 group-hover:text-white">
+          <span className="text-[11px] font-medium tracking-tight text-black/70 group-hover:text-black dark:text-white/70 dark:group-hover:text-white">
             {label}
           </span>
         )}
         {badge !== undefined && (
-          <span className="text-[11px] font-semibold text-white/90">
+          <span className="text-[11px] font-semibold text-black/90 dark:text-white/90">
             {badge}
           </span>
         )}
