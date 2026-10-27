@@ -64,7 +64,7 @@ const FALLBACK_VERSES: Verse[] = [
 /**
  * Obtiene los versiculos ordenados para el feed vertical.
  */
-export async function getFeedVerses(version: string = 'RVR09'): Promise<Verse[]> {
+export async function getFeedVerses(version: string = 'RVR1960'): Promise<Verse[]> {
   if (!isSupabaseConfigured) {
     return FALLBACK_VERSES.map((v) => ({ ...v, version }));
   }

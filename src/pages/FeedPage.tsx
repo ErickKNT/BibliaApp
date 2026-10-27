@@ -16,7 +16,7 @@ import {
 
 export const FeedPage: React.FC = () => {
   const [verses, setVerses] = useState<Verse[]>([]);
-  const [currentVersion, setCurrentVersion] = useState<string>('RVR09');
+  const [currentVersion, setCurrentVersion] = useState<string>('RVR1960');
   const [activeVerseId, setActiveVerseId] = useState<string>('');
 
   const [likedVerseIds, setLikedVerseIds] = useState<Set<string>>(new Set());
@@ -159,7 +159,7 @@ export const FeedPage: React.FC = () => {
   };
 
   const handleVersionCycle = () => {
-    const versions = ['RVR09', 'WEB', 'BL95'];
+    const versions = ['RVR1960', 'RVR09', 'WEB'];
     const nextIndex = (versions.indexOf(currentVersion) + 1) % versions.length;
     setCurrentVersion(versions[nextIndex]);
   };
