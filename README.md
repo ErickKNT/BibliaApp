@@ -50,3 +50,4 @@ Todas las skills y sus hashes están versionados en Git. Cualquier modificación
 git diff .agents/
 git status
 ```
+

@@ -36,3 +36,4 @@ Write-Host "`n[4/4] Verificando estado en Git..." -ForegroundColor Yellow
 git status --short .agents/ skills-lock.json
 
 Write-Host "`nRevision finalizada." -ForegroundColor Green
+

@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 .pnpm-store/
+dist/
+dist-ssr/
+*.tsbuildinfo
 __pycache__/
 *.pyc
 
@@ -15,3 +18,4 @@ graphify-out/
 # OS files
 Thumbs.db
 .DS_Store
+
