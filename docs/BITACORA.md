@@ -61,6 +61,7 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
   * Inyeccion de datos de siembra iniciales en `supabase/seed.sql` con versiculos de Filipenses 4, Juan 1, Salmos 23 y Genesis 1 (Reina-Valera 1909 - Dominio Publico) con metadatos de contexto historico y teologico.
   * Creacion de `.env.example` y cliente en `src/lib/supabase.ts` con soporte de sesion anonima progresiva y fallback de desarrollo offline sin bloqueos.
   * Implementacion del servicio de datos `src/services/bibleService.ts` conectando la interfaz de React con Supabase y respaldo en LocalStorage.
+  * Ingestion masiva automatizada (ETL) mediante `scripts/seed-bible.mjs`: se descargaron y sembraron con exito los 66 libros completos (31,104 versiculos) en 78 lotes de 400 registros, indexados y ordenados secuencialmente por `global_order` (1 a 31104) desde Genesis 1:1 hasta Apocalipsis 22:21.
   * Compilacion validada sin errores en TypeScript y Vite.
 
 #### Decisiones Tomadas (ADRs Rapidos)
@@ -72,6 +73,7 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 * **ADR-006 (Exclusion de Modulo de Audio):** Exclusion deliberada del componente de narracion de voz para mantener la aplicacion ligera y centrada en lectura y meditacion textual.
 * **ADR-007 (Barra de Acciones HUD Persistente):** Extraccion de la barra de acciones fuera de las tarjetas de versiculos para mantenerla fija en la pantalla durante el desplazamiento. Sincronizacion reactiva del versiculo activo mediante IntersectionObserver (umbral 0.6) para asegurar que unicamente el contenido textual se desplace verticalmente.
 * **ADR-008 (Arquitectura Hibrida Supabase con Respaldo Offline Local):** El cliente de datos conmuta de forma transparente entre Supabase (si las credenciales estan activas) y almacenamiento local / datos de respaldo si no hay conexion o credenciales configuradas, evitando excepciones no controladas.
+* **ADR-009 (Ingesta Masiva por Lotes con Upsert Resiliente):** La carga completa del canon biblico se ejecuto en lotes de 400 registros utilizando la clave service_role en el entorno de desarrollo y la clausula onConflict para prevenir duplicados y sobrecargas de red.
 
 ---
 
@@ -82,6 +84,6 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 - [x] **Hito 2:** Estructura de carpetas Atomic Design y componentes base (IconButton, Badge, VerseActionBar, VerseCard, NotesModal).
 - [x] **Hito 3:** Prototipo del Feed Snap Scroll a pantalla completa con datos de prueba (RVR09) y soporte de interaccion tactil.
 - [x] **Hito 4:** Evaluacion y fusion de componentes visuales de Google Stitch (contexto historico, selector rapido de traduccion, explorador de libros, indicador PWA, omitiendo audio).
-- [x] **Hito 5:** Configuracion de Supabase (tablas verses, verse_likes, verse_notes, RLS, migracion de textos libres).
+- [x] **Hito 5:** Configuracion de Supabase (tablas verses, verse_likes, verse_notes, RLS, migracion y siembra completa de los 66 libros).
 - [x] **Hito 6:** Conexion del cliente Supabase a la UI (persistencia real de notas y likes con sesion anonima).
 - [ ] **Hito 7:** Configuracion de PWA (Service Worker, manifiesto, lectura offline).

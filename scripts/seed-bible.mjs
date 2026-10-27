@@ -149,3 +149,4 @@ main().catch((err) => {
   console.error('\nError general durante la ejecucion:', err);
   process.exit(1);
 });
+
