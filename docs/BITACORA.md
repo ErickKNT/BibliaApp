@@ -106,6 +106,11 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
     * Selector formal en `ProfileModal` con opciones de Oscuro, Claro y Deteccion automatica del Sistema (`window.matchMedia`).
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Preparacion de Despliegue en Vercel y Enrutamiento SPA (Hito 6.8)**:
+  * Creacion del archivo de configuracion `vercel.json` en la raiz del proyecto con declaracion del framework Vite, comando de compilacion `npm run build`, directorio de salida `dist` y reglas de reescritura (`rewrites`) para redireccion universal a `index.html`. Esto garantiza que la navegacion y recargas directas en navegadores moviles no arrojen errores 404.
+  * Definicion de las variables de entorno de produccion requeridas (`VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`).
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
