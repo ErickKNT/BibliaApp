@@ -86,6 +86,15 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
     * Selector de traducciones activo.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Correccion de Desbordamiento en Modales y Alineacion de Cuadriculas (Hito 6.6)**:
+  * Diagnostico de desbordamiento: en pantallas de laptops y resoluciones con escalado de pantalla (DPI scaling), la altura fija previa de `750px` en `BookExplorerModal` y `ProfileModal` excedia la altura util del viewport (`100dvh`), provocando que los pies de pagina quedaran recortados por el borde inferior de la pantalla o la barra de tareas de Windows.
+  * Ajuste de contencion en `BookExplorerModal`, `ProfileModal` y `NotesModal`:
+    * Reemplazo de la altura fija por una cota dinamica: `h-[92dvh] sm:h-[620px]` con restriccion estricta `max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-2.5rem)]`.
+    * Inyeccion de `min-h-0` en el contenedor raiz flexbox y en las areas deslizables para habilitar la contraccion automatica de scroll.
+    * Inyeccion de `shrink-0` en todas las barras de cabecera, subcabecera, buscador, filtros y barras inferiores de pie de pagina, garantizando que nunca se compriman ni salgan de la pantalla.
+    * Adicion de `content-start` en la cuadricula de capitulos de `BookExplorerModal`: resuelve el espaciado vertical excesivo entre filas de capitulos al empaquetarlas ordenadamente desde arriba con un espaciado uniforme.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
@@ -97,6 +106,7 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 * **ADR-008 (Arquitectura Hibrida Supabase con Respaldo Offline Local):** El cliente de datos conmuta de forma transparente entre Supabase (si las credenciales estan activas) y almacenamiento local / datos de respaldo si no hay conexion o credenciales configuradas, evitando excepciones no controladas.
 * **ADR-009 (Ingesta Masiva por Lotes con Upsert Resiliente):** La carga completa del canon biblico se ejecuto en lotes de 400 registros utilizando la clave service_role en el entorno de desarrollo y la clausula onConflict para prevenir duplicados y sobrecargas de red.
 * **ADR-010 (Navegacion Canónica y Paginacion Continua por Orden Global):** La seleccion de libro y capitulo calcula el primer versiculo de la seccion y extrae un bloque consecutivo a partir de `global_order`. Esto permite que el desplazamiento snap vertical no se detenga al culminar un capitulo, sino que continue de forma fluida hacia el capitulo subsiguiente.
+* **ADR-011 (Contencion Responsiva de Modales y Anclaje con Flex Shrink):** Se previene el desbordamiento vertical y el recorte de pies de pagina en pantallas con escalado DPI o menor resolucion vertical mediante cotas dinamicas `max-h-[calc(100dvh-2.5rem)]` y `min-h-0`. Se anclan todas las barras superior/inferior con `shrink-0` y se aplica `content-start` a las cuadriculas flex/grid para evitar distribuciones artificiales de espacio.
 
 ---
 

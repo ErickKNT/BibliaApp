@@ -78,3 +78,4 @@ export const CANONICAL_BOOKS: CanonicalBook[] = [
   { order: 65, name: 'San Judas', abbrev: 'jd', chapters: 1, testament: 'nuevo', category: 'Epístolas Generales' },
   { order: 66, name: 'El Apocalipsis', abbrev: 'ap', chapters: 22, testament: 'nuevo', category: 'Profecía' },
 ];
+

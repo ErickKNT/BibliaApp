@@ -31,7 +31,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 animate-in fade-in select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 animate-in fade-in select-none">
       <div
         onClick={onClose}
         className="fixed inset-0 bg-[#0e0e10]/80 backdrop-blur-md"
@@ -39,17 +39,21 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
       <section
         aria-label="Perfil y Guardados"
-        className="relative z-50 flex h-full sm:h-[750px] w-full max-w-xl flex-col rounded-none sm:rounded-3xl border-0 sm:border border-white/10 bg-[#131315] text-white shadow-2xl overflow-hidden"
+        className="relative z-50 flex h-[92dvh] sm:h-[620px] max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-2.5rem)] w-full max-w-xl flex-col rounded-2xl sm:rounded-3xl border border-white/10 bg-[#131315] text-white shadow-2xl overflow-hidden min-h-0"
       >
         {/* Cabecera */}
-        <div className="px-6 pt-5 pb-4 flex items-center justify-between border-b border-white/5">
+        <div className="px-5 sm:px-6 pt-4 pb-3 sm:py-4 flex items-center justify-between border-b border-white/5 shrink-0 bg-[#131315]">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-white text-black flex items-center justify-center font-bold">
-              <User className="h-5 w-5" />
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-white text-black flex items-center justify-center font-bold">
+              <User className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-white">Lector Anonimo</h2>
-              <span className="text-xs text-white/50">Progreso guardado localmente</span>
+              <h2 className="text-sm sm:text-base font-semibold text-white leading-none">
+                Lector Anonimo
+              </h2>
+              <span className="text-[11px] text-white/50 mt-0.5 block">
+                Progreso guardado localmente
+              </span>
             </div>
           </div>
           <button
@@ -62,27 +66,27 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         </div>
 
         {/* Tarjetas resumen: Racha y Biblioteca Offline */}
-        <div className="p-6 grid grid-cols-2 gap-3 border-b border-white/5 bg-[#171618]">
+        <div className="p-4 sm:p-5 grid grid-cols-2 gap-3 border-b border-white/5 bg-[#171618] shrink-0">
           {/* Racha */}
-          <div className="rounded-2xl border border-white/5 bg-[#201f22] p-4 flex flex-col justify-between">
+          <div className="rounded-xl sm:rounded-2xl border border-white/5 bg-[#201f22] p-3 sm:p-4 flex flex-col justify-between">
             <div className="flex items-center justify-between text-white/60">
-              <span className="text-xs font-medium">Racha de lectura</span>
+              <span className="text-[11px] sm:text-xs font-medium">Racha de lectura</span>
               <Flame className="h-4 w-4 text-white" />
             </div>
-            <div className="mt-3">
-              <span className="text-2xl font-bold text-white">4 dias</span>
-              <span className="block text-[11px] text-white/40">Constancia activa</span>
+            <div className="mt-2 sm:mt-3">
+              <span className="text-xl sm:text-2xl font-bold text-white">4 dias</span>
+              <span className="block text-[10px] sm:text-[11px] text-white/40">Constancia activa</span>
             </div>
           </div>
 
           {/* Estado Offline PWA */}
-          <div className="rounded-2xl border border-white/5 bg-[#201f22] p-4 flex flex-col justify-between">
+          <div className="rounded-xl sm:rounded-2xl border border-white/5 bg-[#201f22] p-3 sm:p-4 flex flex-col justify-between">
             <div className="flex items-center justify-between text-white/60">
-              <span className="text-xs font-medium">Modo PWA Offline</span>
+              <span className="text-[11px] sm:text-xs font-medium">Modo PWA Offline</span>
               <Wifi className="h-4 w-4 text-white" />
             </div>
-            <div className="mt-3">
-              <span className="text-2xl font-bold text-white">100%</span>
+            <div className="mt-2 sm:mt-3">
+              <span className="text-xl sm:text-2xl font-bold text-white">100%</span>
               <div className="mt-1 h-1 w-full rounded-full bg-white/10 overflow-hidden">
                 <div className="h-full bg-white rounded-full w-full" />
               </div>
@@ -91,7 +95,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         </div>
 
         {/* Pestañas de navegacion */}
-        <div className="px-6 py-2.5 flex items-center gap-2 border-b border-white/5 bg-[#141416]">
+        <div className="px-5 sm:px-6 py-2 flex items-center gap-2 border-b border-white/5 bg-[#141416] shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('guardados')}
@@ -118,8 +122,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           </button>
         </div>
 
-        {/* Contenido segun pestana */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-3 no-scrollbar">
+        {/* Contenido segun pestana con scroll interno */}
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-3 no-scrollbar">
           {activeTab === 'guardados' ? (
             bookmarkedVerses.length === 0 ? (
               <div className="flex h-48 flex-col items-center justify-center text-center">
@@ -135,7 +139,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               bookmarkedVerses.map((verse) => (
                 <div
                   key={verse.id}
-                  className="group rounded-2xl border border-white/5 bg-[#201f22] p-4 text-left transition-all hover:border-white/20"
+                  className="group rounded-2xl border border-white/5 bg-[#201f22] p-3.5 sm:p-4 text-left transition-all hover:border-white/20"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold text-white">
@@ -160,7 +164,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       )}
                     </div>
                   </div>
-                  <p className="font-serif text-sm leading-relaxed text-white/90 mb-3">
+                  <p className="font-serif text-xs sm:text-sm leading-relaxed text-white/90 mb-3">
                     “{verse.text}”
                   </p>
                   {onNavigateToVerse && (
@@ -180,7 +184,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               ))
             )
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-5 sm:space-y-6">
               {/* Ajuste de tamano de texto */}
               <div>
                 <span className="text-xs font-semibold text-white/70 block mb-2">
@@ -192,7 +196,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       key={size}
                       type="button"
                       onClick={() => onSelectFontSize(size)}
-                      className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${
+                      className={`py-2 sm:py-2.5 rounded-xl text-xs font-bold border transition-all ${
                         fontSize === size
                           ? 'border-white bg-white text-black shadow-sm'
                           : 'border-white/10 bg-[#201f22] text-white/70 hover:text-white'
@@ -220,17 +224,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       key={ver.id}
                       type="button"
                       onClick={() => onSelectVersion(ver.id)}
-                      className={`w-full flex items-center justify-between p-3.5 rounded-xl border transition-all text-left ${
+                      className={`w-full flex items-center justify-between p-3 sm:p-3.5 rounded-xl border transition-all text-left ${
                         currentVersion === ver.id
                           ? 'border-white bg-[#2a2a2c] shadow-sm'
                           : 'border-white/5 bg-[#201f22] hover:bg-[#28272a] hover:border-white/20'
                       }`}
                     >
                       <div>
-                        <span className="text-sm font-bold text-white block">
+                        <span className="text-xs sm:text-sm font-bold text-white block">
                           {ver.id}
                         </span>
-                        <span className="text-xs text-white/50">
+                        <span className="text-[11px] sm:text-xs text-white/50">
                           {ver.name}
                         </span>
                       </div>
