@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Verse, VerseNote } from '@/types/bible';
-import { X, User, Flame, Wifi, Bookmark, Settings, Check } from 'lucide-react';
+import { X, User, Flame, Wifi, Bookmark, Settings, Check, ExternalLink, Trash2 } from 'lucide-react';
 
 export interface ProfileModalProps {
   isOpen: boolean;
@@ -8,7 +8,11 @@ export interface ProfileModalProps {
   bookmarkedVerses: Verse[];
   notes: VerseNote[];
   currentVersion: string;
+  fontSize: 'normal' | 'grande' | 'extra';
   onSelectVersion: (version: string) => void;
+  onSelectFontSize: (size: 'normal' | 'grande' | 'extra') => void;
+  onNavigateToVerse?: (verse: Verse) => void;
+  onRemoveBookmark?: (verseId: string) => void;
 }
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({
@@ -16,15 +20,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   onClose,
   bookmarkedVerses,
   currentVersion,
+  fontSize,
   onSelectVersion,
+  onSelectFontSize,
+  onNavigateToVerse,
+  onRemoveBookmark,
 }) => {
   const [activeTab, setActiveTab] = useState<'guardados' | 'ajustes'>('guardados');
-  const [fontSize, setFontSize] = useState<'normal' | 'grande' | 'extra'>('normal');
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 animate-in fade-in select-none">
       <div
         onClick={onClose}
         className="fixed inset-0 bg-[#0e0e10]/80 backdrop-blur-md"
@@ -48,13 +55,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-white/60 hover:bg-white/10 hover:text-white"
+            className="rounded-full p-2 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Tarjetas resumen: Racha y Biblioteca PWA Offline */}
+        {/* Tarjetas resumen: Racha y Biblioteca Offline */}
         <div className="p-6 grid grid-cols-2 gap-3 border-b border-white/5 bg-[#171618]">
           {/* Racha */}
           <div className="rounded-2xl border border-white/5 bg-[#201f22] p-4 flex flex-col justify-between">
@@ -84,7 +91,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         </div>
 
         {/* Pestañas de navegacion */}
-        <div className="px-6 py-2.5 flex items-center gap-2 border-b border-white/5">
+        <div className="px-6 py-2.5 flex items-center gap-2 border-b border-white/5 bg-[#141416]">
           <button
             type="button"
             onClick={() => setActiveTab('guardados')}
@@ -128,19 +135,47 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               bookmarkedVerses.map((verse) => (
                 <div
                   key={verse.id}
-                  className="rounded-2xl border border-white/5 bg-[#201f22] p-4 text-left"
+                  className="group rounded-2xl border border-white/5 bg-[#201f22] p-4 text-left transition-all hover:border-white/20"
                 >
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold text-white">
                       {verse.bookName} {verse.chapter}:{verse.verseNumber}
                     </span>
-                    <span className="text-[10px] text-white/50 uppercase">
-                      {verse.version}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-white/50 uppercase">
+                        {verse.version}
+                      </span>
+                      {onRemoveBookmark && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRemoveBookmark(verse.id);
+                          }}
+                          className="text-white/40 hover:text-white p-1 rounded-md transition-colors"
+                          title="Eliminar de guardados"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <p className="font-serif text-sm leading-relaxed text-white/90">
+                  <p className="font-serif text-sm leading-relaxed text-white/90 mb-3">
                     “{verse.text}”
                   </p>
+                  {onNavigateToVerse && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onNavigateToVerse(verse);
+                        onClose();
+                      }}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/70 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      <span>Ir a este versiculo</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </button>
+                  )}
                 </div>
               ))
             )
@@ -149,17 +184,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               {/* Ajuste de tamano de texto */}
               <div>
                 <span className="text-xs font-semibold text-white/70 block mb-2">
-                  Tamano de tipografia
+                  Tamano de tipografia en pantalla
                 </span>
                 <div className="grid grid-cols-3 gap-2">
                   {(['normal', 'grande', 'extra'] as const).map((size) => (
                     <button
                       key={size}
                       type="button"
-                      onClick={() => setFontSize(size)}
-                      className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+                      onClick={() => onSelectFontSize(size)}
+                      className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${
                         fontSize === size
-                          ? 'border-white bg-white text-black'
+                          ? 'border-white bg-white text-black shadow-sm'
                           : 'border-white/10 bg-[#201f22] text-white/70 hover:text-white'
                       }`}
                     >
@@ -172,22 +207,27 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               {/* Selector de version preferida */}
               <div>
                 <span className="text-xs font-semibold text-white/70 block mb-2">
-                  Traduccion preferida
+                  Traduccion biblica activa
                 </span>
                 <div className="space-y-2">
                   {[
+                    { id: 'RVR1960', name: 'Reina-Valera 1960 (66 libros completos en Supabase)' },
                     { id: 'RVR09', name: 'Reina-Valera 1909 (Dominio Publico)' },
                     { id: 'WEB', name: 'World English Bible (Public Domain)' },
-                    { id: 'BL95', name: 'Biblia Libre 1995 (Abierta)' },
+                    { id: 'BL95', name: 'Biblia Abierta / Libre' },
                   ].map((ver) => (
                     <button
                       key={ver.id}
                       type="button"
                       onClick={() => onSelectVersion(ver.id)}
-                      className="w-full flex items-center justify-between p-3.5 rounded-xl border border-white/5 bg-[#201f22] hover:bg-[#2a2a2c] text-left transition-colors"
+                      className={`w-full flex items-center justify-between p-3.5 rounded-xl border transition-all text-left ${
+                        currentVersion === ver.id
+                          ? 'border-white bg-[#2a2a2c] shadow-sm'
+                          : 'border-white/5 bg-[#201f22] hover:bg-[#28272a] hover:border-white/20'
+                      }`}
                     >
                       <div>
-                        <span className="text-sm font-semibold text-white block">
+                        <span className="text-sm font-bold text-white block">
                           {ver.id}
                         </span>
                         <span className="text-xs text-white/50">
@@ -208,4 +248,3 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     </div>
   );
 };
-

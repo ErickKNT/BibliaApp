@@ -64,6 +64,28 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
   * Ingestion masiva automatizada (ETL) mediante `scripts/seed-bible.mjs`: se descargaron y sembraron con exito los 66 libros completos (31,104 versiculos) en 78 lotes de 400 registros, indexados y ordenados secuencialmente por `global_order` (1 a 31104) desde Genesis 1:1 hasta Apocalipsis 22:21.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Navegacion Integral del Canon Biblico y Activacion de Botones/Pestanas (Hito 6.5)**:
+  * Definicion canica completa de los 66 libros en `src/data/bibleBooks.ts` con nombres alineados a la base de datos Supabase, abreviaturas, conteo de capitulos (1,189 en total), clasificacion por testamento y categorias.
+  * Habilitacion completa de `BookExplorerModal`:
+    * Conmutador interactivo de testamentos: Antiguo Testamento (39 libros) y Nuevo Testamento (27 libros) con conteo dinamico.
+    * Buscador en tiempo real con normalizacion de diacriticos (permite buscar "genesis", "exodo", "salmos", "mateo", etc. sin importar acentos o mayusculas).
+    * Filtro opcional por categorias tematicas (Pentateuco, Historicos, Poeticos, Profetas, Evangelios, Epistolas, Profecia).
+    * Flujo de dos vistas: transicion fluida de seleccion de libro a cuadricula de seleccion de capitulo (1 a N).
+    * Acceso rapido a "Iniciar en Cap. 1" y resguardo/reanudacion de ultima lectura leida.
+  * Extension del servicio de datos `src/services/bibleService.ts`:
+    * Implementacion de `getVersesByBookAndChapter` para saltar a cualquier punto de la Biblia cargando desde el indice `global_order`.
+    * Implementacion de `getMoreVerses` para scroll infinito continuo a medida que el lector desciende en el feed vertical.
+    * Persistencia de ultima lectura (`saveLastReading` y `getLastReading`).
+  * Sincronizacion de `TopBar`:
+    * Muestra en tiempo real el libro y capitulo activo (`activeBookName` y `activeChapter`).
+    * Al pulsar la capsula superior se abre directamente el explorador de libros.
+  * Enriquecimiento interactivo de `ProfileModal`:
+    * Navegacion directa: pulsar cualquier versiculo guardado traslada el feed al versiculo exacto.
+    * Eliminacion interactiva de versiculos guardados con actualizacion en almacenamiento local.
+    * Selector de tamano de tipografia ('normal', 'grande', 'extra') reactivo que escala el texto de `VerseCard`.
+    * Selector de traducciones activo.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
@@ -74,6 +96,7 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 * **ADR-007 (Barra de Acciones HUD Persistente):** Extraccion de la barra de acciones fuera de las tarjetas de versiculos para mantenerla fija en la pantalla durante el desplazamiento. Sincronizacion reactiva del versiculo activo mediante IntersectionObserver (umbral 0.6) para asegurar que unicamente el contenido textual se desplace verticalmente.
 * **ADR-008 (Arquitectura Hibrida Supabase con Respaldo Offline Local):** El cliente de datos conmuta de forma transparente entre Supabase (si las credenciales estan activas) y almacenamiento local / datos de respaldo si no hay conexion o credenciales configuradas, evitando excepciones no controladas.
 * **ADR-009 (Ingesta Masiva por Lotes con Upsert Resiliente):** La carga completa del canon biblico se ejecuto en lotes de 400 registros utilizando la clave service_role en el entorno de desarrollo y la clausula onConflict para prevenir duplicados y sobrecargas de red.
+* **ADR-010 (Navegacion Canónica y Paginacion Continua por Orden Global):** La seleccion de libro y capitulo calcula el primer versiculo de la seccion y extrae un bloque consecutivo a partir de `global_order`. Esto permite que el desplazamiento snap vertical no se detenga al culminar un capitulo, sino que continue de forma fluida hacia el capitulo subsiguiente.
 
 ---
 

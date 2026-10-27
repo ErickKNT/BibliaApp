@@ -1,5 +1,13 @@
 import { supabase, isSupabaseConfigured, ensureSession } from '@/lib/supabase';
 import type { Verse, VerseNote } from '@/types/bible';
+import { CANONICAL_BOOKS } from '@/data/bibleBooks';
+
+export interface LastReading {
+  bookOrder: number;
+  chapter: number;
+  bookName: string;
+  verseNumber?: number;
+}
 
 // Datos de respaldo offline (Dominio Publico)
 const FALLBACK_VERSES: Verse[] = [
@@ -61,10 +69,60 @@ const FALLBACK_VERSES: Verse[] = [
   },
 ];
 
+interface VerseRow {
+  id: string;
+  book_name: string;
+  book_order: number;
+  chapter: number;
+  verse_number: number;
+  text: string;
+  version: string;
+  chapter_context?: string;
+  historical_context?: string;
+  global_order: number;
+}
+
+function mapVerseRow(row: VerseRow): Verse {
+  return {
+    id: row.id,
+    bookName: row.book_name,
+    bookOrder: row.book_order,
+    chapter: row.chapter,
+    verseNumber: row.verse_number,
+    text: row.text,
+    version: row.version,
+    chapterContext: row.chapter_context || `${row.book_name.toUpperCase()} · CAP. ${row.chapter}`,
+    historicalContext: row.historical_context,
+    globalOrder: row.global_order,
+  };
+}
+
+function createOfflineFallbackVerses(bookOrder: number, chapter: number, version: string): Verse[] {
+  const canonical = CANONICAL_BOOKS.find((b) => b.order === bookOrder);
+  const bookName = canonical ? canonical.name : `Libro ${bookOrder}`;
+
+  return [
+    {
+      id: `offline-${bookOrder}-${chapter}-1`,
+      bookName,
+      bookOrder,
+      chapter,
+      verseNumber: 1,
+      text: `Lectura de ${bookName} capitulo ${chapter}. Conectate a Supabase para cargar los 31,104 versiculos completos de la Biblia.`,
+      version,
+      chapterContext: `${bookName.toUpperCase()} · CAP. ${chapter}`,
+      historicalContext: `Canon Biblico #${bookOrder} · ${canonical?.category || 'Escrituras'}`,
+      globalOrder: bookOrder * 1000 + chapter,
+      likeCount: 0,
+      notesCount: 0,
+    },
+  ];
+}
+
 /**
- * Obtiene los versiculos ordenados para el feed vertical.
+ * Obtiene los versiculos iniciales para el feed vertical.
  */
-export async function getFeedVerses(version: string = 'RVR1960'): Promise<Verse[]> {
+export async function getFeedVerses(version: string = 'RVR1960', limit: number = 30): Promise<Verse[]> {
   if (!isSupabaseConfigured) {
     return FALLBACK_VERSES.map((v) => ({ ...v, version }));
   }
@@ -75,29 +133,143 @@ export async function getFeedVerses(version: string = 'RVR1960'): Promise<Verse[
       .select('*')
       .eq('version', version)
       .order('global_order', { ascending: true })
-      .limit(30);
+      .limit(limit);
 
     if (error || !data || data.length === 0) {
-      console.warn('Consulta a Supabase sin resultados o con error, usando respaldo:', error?.message);
+      console.warn('Consulta a Supabase sin resultados con version', version, error?.message);
+      // Si la version especificada no esta poblada, intentar RVR1960 como respaldo
+      if (version !== 'RVR1960') {
+        const { data: fallbackData } = await supabase
+          .from('verses')
+          .select('*')
+          .eq('version', 'RVR1960')
+          .order('global_order', { ascending: true })
+          .limit(limit);
+
+        if (fallbackData && fallbackData.length > 0) {
+          return fallbackData.map(mapVerseRow);
+        }
+      }
       return FALLBACK_VERSES.map((v) => ({ ...v, version }));
     }
 
-    return data.map((row) => ({
-      id: row.id,
-      bookName: row.book_name,
-      bookOrder: row.book_order,
-      chapter: row.chapter,
-      verseNumber: row.verse_number,
-      text: row.text,
-      version: row.version,
-      chapterContext: row.chapter_context,
-      historicalContext: row.historical_context,
-      globalOrder: row.global_order,
-    }));
+    return data.map(mapVerseRow);
   } catch (err) {
     console.error('Error al consultar versiculos en Supabase:', err);
     return FALLBACK_VERSES.map((v) => ({ ...v, version }));
   }
+}
+
+/**
+ * Obtiene versiculos a partir de un libro y capitulo especifico para navegacion directa.
+ */
+export async function getVersesByBookAndChapter(
+  bookOrder: number,
+  chapter: number,
+  version: string = 'RVR1960',
+  limit: number = 40
+): Promise<Verse[]> {
+  if (!isSupabaseConfigured) {
+    return createOfflineFallbackVerses(bookOrder, chapter, version);
+  }
+
+  try {
+    // 1. Obtener el global_order del versiculo 1 de ese capitulo
+    const { data: firstVerse, error: firstError } = await supabase
+      .from('verses')
+      .select('global_order')
+      .eq('version', version)
+      .eq('book_order', bookOrder)
+      .eq('chapter', chapter)
+      .order('verse_number', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (firstError || !firstVerse) {
+      // Reintentar con version RVR1960 si la actual no devuelve resultados
+      if (version !== 'RVR1960') {
+        return getVersesByBookAndChapter(bookOrder, chapter, 'RVR1960', limit);
+      }
+      console.warn(`No se encontro el versiculo para libro ${bookOrder}, capitulo ${chapter}`);
+      return createOfflineFallbackVerses(bookOrder, chapter, version);
+    }
+
+    // 2. Traer el lote de versiculos a partir de ese global_order para lectura fluida
+    const { data, error } = await supabase
+      .from('verses')
+      .select('*')
+      .eq('version', version)
+      .gte('global_order', firstVerse.global_order)
+      .order('global_order', { ascending: true })
+      .limit(limit);
+
+    if (error || !data || data.length === 0) {
+      return createOfflineFallbackVerses(bookOrder, chapter, version);
+    }
+
+    return data.map(mapVerseRow);
+  } catch (err) {
+    console.error('Error al cargar versiculos por libro y capitulo:', err);
+    return createOfflineFallbackVerses(bookOrder, chapter, version);
+  }
+}
+
+/**
+ * Carga el siguiente lote de versiculos para scroll infinito progresivo.
+ */
+export async function getMoreVerses(
+  afterGlobalOrder: number,
+  version: string = 'RVR1960',
+  limit: number = 30
+): Promise<Verse[]> {
+  if (!isSupabaseConfigured) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from('verses')
+      .select('*')
+      .eq('version', version)
+      .gt('global_order', afterGlobalOrder)
+      .order('global_order', { ascending: true })
+      .limit(limit);
+
+    if (error || !data) return [];
+    return data.map(mapVerseRow);
+  } catch (err) {
+    console.error('Error al paginar mas versiculos:', err);
+    return [];
+  }
+}
+
+/**
+ * Persiste la ultima lectura del usuario en almacenamiento local.
+ */
+export function saveLastReading(reading: LastReading): void {
+  try {
+    localStorage.setItem('biblia_last_reading', JSON.stringify(reading));
+  } catch {
+    // Almacenamiento no disponible
+  }
+}
+
+/**
+ * Obtiene la ultima lectura guardada o retorna Genesis 1 por defecto.
+ */
+export function getLastReading(): LastReading {
+  try {
+    const stored = localStorage.getItem('biblia_last_reading');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // Retornar valor inicial
+  }
+  return {
+    bookOrder: 1,
+    chapter: 1,
+    bookName: 'Génesis',
+    verseNumber: 1,
+  };
 }
 
 /**
