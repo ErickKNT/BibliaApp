@@ -31,3 +31,4 @@ export interface BibleVersion {
   isPublicDomain: boolean;
   language: string;
 }
+

@@ -98,3 +98,4 @@ export const VerseCard: React.FC<VerseCardProps> = ({
     </article>
   );
 };
+

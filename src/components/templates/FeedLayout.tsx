@@ -11,3 +11,4 @@ export const FeedLayout: React.FC<FeedLayoutProps> = ({ children }) => {
     </div>
   );
 };
+

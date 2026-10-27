@@ -58,3 +58,4 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
     </aside>
   );
 };
+

@@ -129,3 +129,4 @@ export const FeedPage: React.FC = () => {
     </>
   );
 };
+

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visor de Pantallas - Diseno Google Stitch</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-950 text-neutral-100 min-h-screen flex flex-col font-sans">
+  <!-- Barra superior de navegacion de pantallas -->
+  <header class="h-16 border-b border-neutral-800 bg-neutral-900/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <span class="text-xs font-mono px-2 py-1 rounded bg-neutral-800 text-neutral-300">GOOGLE STITCH</span>
+      <h1 class="text-sm font-semibold tracking-wide">BibliaApp - Prototipo de Diseno</h1>
+    </div>
+
+    <!-- Selector de pantallas -->
+    <nav class="flex items-center gap-2">
+      <button onclick="loadScreen('1_feed_vertical.html', this)" class="screen-btn px-3 py-1.5 text-xs rounded-full bg-white text-black font-semibold transition-all">
+        1. Feed Vertical
+      </button>
+      <button onclick="loadScreen('2_notas_reflexiones.html', this)" class="screen-btn px-3 py-1.5 text-xs rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-all">
+        2. Notas y Reflexiones
+      </button>
+      <button onclick="loadScreen('3_explorador_libros.html', this)" class="screen-btn px-3 py-1.5 text-xs rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-all">
+        3. Explorador de Libros
+      </button>
+      <button onclick="loadScreen('4_guardados_perfil.html', this)" class="screen-btn px-3 py-1.5 text-xs rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-all">
+        4. Guardados y Perfil
+      </button>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <button id="toggle-frame-btn" onclick="togglePhoneFrame()" class="text-xs px-3 py-1.5 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-neutral-300">
+        Modo: Marco Movil
+      </button>
+    </div>
+  </header>
+
+  <!-- Area de visualizacion -->
+  <main class="flex-1 flex items-center justify-center p-4 overflow-hidden">
+    <div id="container-frame" class="w-[412px] h-[892px] border-4 border-neutral-800 rounded-[48px] overflow-hidden shadow-2xl transition-all duration-300 bg-black relative">
+      <iframe id="preview-iframe" src="1_feed_vertical.html" class="w-full h-full border-0"></iframe>
+    </div>
+  </main>
+
+  <script>
+    let isPhoneFrame = true;
+
+    function loadScreen(file, btn) {
+      document.getElementById('preview-iframe').src = file;
+      document.querySelectorAll('.screen-btn').forEach(b => {
+        b.className = 'screen-btn px-3 py-1.5 text-xs rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-all';
+      });
+      btn.className = 'screen-btn px-3 py-1.5 text-xs rounded-full bg-white text-black font-semibold transition-all';
+    }
+
+    function togglePhoneFrame() {
+      const container = document.getElementById('container-frame');
+      const btn = document.getElementById('toggle-frame-btn');
+      if (isPhoneFrame) {
+        container.className = 'w-full h-full border-0 rounded-none shadow-none bg-black';
+        btn.textContent = 'Modo: Pantalla Completa';
+        isPhoneFrame = false;
+      } else {
+        container.className = 'w-[412px] h-[892px] border-4 border-neutral-800 rounded-[48px] overflow-hidden shadow-2xl bg-black';
+        btn.textContent = 'Modo: Marco Movil';
+        isPhoneFrame = true;
+      }
+    }
+  </script>
+</body>
+</html>
