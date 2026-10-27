@@ -111,6 +111,26 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
   * Definicion de las variables de entorno de produccion requeridas (`VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`).
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Desarrollo en Rama Dedicada: Perfil de Usuario, Pantalla de Bienvenida y Motor de Racha (Hito 6.9 - Rama feature/perfil-bienvenida-racha)**:
+  * Creacion y aislamiento de la rama de trabajo `feature/perfil-bienvenida-racha` para el control de versiones formal en GitHub.
+  * Implementacion del motor de habitos y racha en `src/services/streakService.ts`:
+    * Algoritmo de calculo de dias continuos con fechas locales (`YYYY-MM-DD`).
+    * Deteccion automatica de racha activa hoy, continuidad desde ayer o reinicio tras interrupcion.
+    * Generador de calendario semanal continuo de 7 dias (`L`, `M`, `M`, `J`, `V`, `S`, `D`) con marcado de dias completados y dia actual.
+    * Gestion de perfil de usuario (`UserProfileData`) con persistencia local y sincronizacion de sesion.
+    * Conteo acumulativo de versiculos leidos con incremento automatico durante el scroll en `FeedPage`.
+  * Creacion de `WelcomeModal.tsx`:
+    * Saludo horario contextual en tiempo real ("Buenos dias", "Buenas tardes", "Buenas noches") personalizado con el nombre del lector.
+    * Tarjeta de racha con indicador de fuego e insignia de estado ("Activa hoy" o "Pendiente hoy").
+    * Visualizador semanal de 7 dias con comprobacion de avance.
+    * Versiculo diario inspiracional (Salmos 119:105) y atajo directo a la ultima lectura.
+    * Control de descarte diario (`biblia_welcome_dismissed_date`) para no interrumpir repetidamente en la misma jornada.
+  * Rediseño completo de `ProfileModal.tsx`:
+    * Cabecera con avatar inicial dinamico, edicion rapida de nombre de usuario e insignia de sesion Supabase.
+    * Tarjetas de metricas: Racha actual y record, versiculos leidos y tamano de coleccion.
+    * Cuatro pestanas funcionales: "Racha & Habitos" (con calendario semanal e insignias de constancia desbloqueables), "Guardados" (coleccion con salto al versiculo y borrado), "Reflexiones" (historial de meditaciones personales y comunitarias) y "Ajustes" (tema, tamano de tipografia y version biblica).
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
@@ -125,6 +145,8 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 * **ADR-011 (Contencion Responsiva de Modales y Anclaje con Flex Shrink):** Se previene el desbordamiento vertical y el recorte de pies de pagina en pantallas con escalado DPI o menor resolucion vertical mediante cotas dinamicas `max-h-[calc(100dvh-2.5rem)]` y `min-h-0`. Se anclan todas las barras superior/inferior con `shrink-0` y se aplica `content-start` a las cuadriculas flex/grid para evitar distribuciones artificiales de espacio.
 * **ADR-012 (Desacoplamiento de Contexto Superior en Tarjetas):** La barra superior anclada `TopBar` es la unica responsable de proyectar el libro, capitulo y traduccion activa. Se retiran los duplicados internos en `VerseCard` para maximizar el area de lectura y evitar colisiones visuales en el desplazamiento snap.
 * **ADR-013 (Soporte de Temas Editorial Dual con Deteccion de Sistema):** Implementacion de dos temas de alta legibilidad (Claro en tono papel `#f8f7f4` y Oscuro en obsidiana `#131315`) persistidos en `localStorage` y conmutables mediante conmutador en cabecera o selector de sistema.
+* **ADR-014 (Motor de Racha Diaria con Calendario Semanal y Deteccion de Continuidad):** El registro de racha computa fechas locales consecutivas y actualiza en tiempo real el progreso de 7 dias, recompensando la constancia diaria sin bloqueos de conexion y persistiendo de forma progresiva.
+* **ADR-015 (Bienvenida Contextual Diaria no Intrusiva):** Despliegue de bienvenida una sola vez por jornada natural con versiculo inspiracional y estado de meta, facilitando la transicion directa al feed de lectura sin friccion.
 
 ---
 

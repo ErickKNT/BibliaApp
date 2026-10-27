@@ -7,6 +7,7 @@ import { NotesModal } from '@/components/organisms/NotesModal';
 import { TopBar } from '@/components/organisms/TopBar';
 import { BookExplorerModal } from '@/components/organisms/BookExplorerModal';
 import { ProfileModal } from '@/components/organisms/ProfileModal';
+import { WelcomeModal } from '@/components/organisms/WelcomeModal';
 import {
   getFeedVerses,
   getVersesByBookAndChapter,
@@ -18,6 +19,16 @@ import {
   getLastReading,
   type LastReading,
 } from '@/services/bibleService';
+import {
+  getReadingStreakData,
+  recordVerseReading,
+  getWeeklyStreakDays,
+  getUserProfile,
+  saveUserProfile,
+  getLocalDateString,
+  type ReadingStreakData,
+  type UserProfileData,
+} from '@/services/streakService';
 import { Loader2 } from 'lucide-react';
 
 export const FeedPage: React.FC = () => {
@@ -26,6 +37,20 @@ export const FeedPage: React.FC = () => {
   const [activeVerseId, setActiveVerseId] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+
+  // Racha de lectura y perfil de usuario
+  const [streakData, setStreakData] = useState<ReadingStreakData>(() => getReadingStreakData());
+  const [userProfile, setUserProfile] = useState<UserProfileData>(() => getUserProfile());
+
+  // Pantalla de bienvenida diaria
+  const [isWelcomeOpen, setIsWelcomeOpen] = useState<boolean>(() => {
+    try {
+      const dismissed = localStorage.getItem('biblia_welcome_dismissed_date');
+      return dismissed !== getLocalDateString();
+    } catch {
+      return false;
+    }
+  });
 
   // Tema de apariencia (Modo Claro / Modo Oscuro / Sistema)
   const [theme, setTheme] = useState<'dark' | 'light' | 'system'>(() => {
@@ -144,6 +169,10 @@ export const FeedPage: React.FC = () => {
                 };
                 setLastReading(reading);
                 saveLastReading(reading);
+
+                // Registrar lectura de versiculo y actualizar racha
+                const updatedStreak = recordVerseReading();
+                setStreakData(updatedStreak);
               }
             }
           }
@@ -202,6 +231,26 @@ export const FeedPage: React.FC = () => {
   const handleSelectTheme = (newTheme: 'dark' | 'light' | 'system') => {
     setTheme(newTheme);
     localStorage.setItem('biblia_theme', newTheme);
+  };
+
+  // Actualizar nombre de usuario
+  const handleUpdateUserName = (newName: string) => {
+    const updated: UserProfileData = {
+      ...userProfile,
+      name: newName,
+    };
+    setUserProfile(updated);
+    saveUserProfile(updated);
+  };
+
+  // Cierre de bienvenida diaria
+  const handleCloseWelcome = () => {
+    setIsWelcomeOpen(false);
+    try {
+      localStorage.setItem('biblia_welcome_dismissed_date', getLocalDateString());
+    } catch {
+      // Ignorar error de guardado
+    }
   };
 
   // Navegacion directa desde el Explorador de Libros
@@ -316,7 +365,7 @@ export const FeedPage: React.FC = () => {
   };
 
   const handleShare = async (verse: Verse) => {
-    const shareText = `"${verse.text}"\n— ${verse.bookName} ${verse.chapter}:${verse.verseNumber} (${verse.version})\n\nLeido en BibliaApp`;
+    const shareText = `"${verse.text}"\n— ${verse.bookName} ${verse.chapter}:${verse.verseNumber} (${verse.version})\n\nLeído en BibliaApp`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -383,6 +432,10 @@ export const FeedPage: React.FC = () => {
       savedVerse.bookName
     );
   };
+
+  // Calcular dias de la semana activa
+  const weeklyDays = getWeeklyStreakDays(streakData);
+  const isStreakCompletedToday = new Set(streakData.historyDates || []).has(getLocalDateString());
 
   return (
     <div className="relative h-full w-full bg-[#f8f7f4] dark:bg-[#131315] text-[#18181b] dark:text-white transition-colors duration-200">
@@ -454,6 +507,18 @@ export const FeedPage: React.FC = () => {
         </FeedLayout>
       )}
 
+      {/* Pantalla de Bienvenida Diaria Contextual */}
+      <WelcomeModal
+        isOpen={isWelcomeOpen}
+        userName={userProfile.name}
+        streak={streakData.currentStreak}
+        isStreakCompletedToday={isStreakCompletedToday}
+        weeklyDays={weeklyDays}
+        lastReading={lastReading}
+        onClose={handleCloseWelcome}
+        onResumeReading={handleCloseWelcome}
+      />
+
       {/* Modal de Notas y Reflexiones (Bottom Sheet) */}
       <NotesModal
         verse={activeVerseForNotes}
@@ -473,15 +538,19 @@ export const FeedPage: React.FC = () => {
         onSelectBookAndChapter={handleSelectBookAndChapter}
       />
 
-      {/* Modal de Perfil, Guardados y Ajustes PWA con selector de tema */}
+      {/* Modal de Perfil de Usuario Rediseñado con Racha y Logros */}
       <ProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
+        streakData={streakData}
+        weeklyDays={weeklyDays}
+        userProfile={userProfile}
         bookmarkedVerses={savedVersesList}
         notes={notes}
         currentVersion={currentVersion}
         fontSize={fontSize}
         theme={theme}
+        onUpdateUserName={handleUpdateUserName}
         onSelectVersion={handleSelectVersion}
         onSelectFontSize={handleFontSizeChange}
         onSelectTheme={handleSelectTheme}
