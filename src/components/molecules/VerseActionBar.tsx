@@ -1,12 +1,14 @@
 import React from 'react';
 import { Heart, FileText, Bookmark, Share2 } from 'lucide-react';
 import { IconButton } from '@/components/atoms/IconButton';
+import { cn } from '@/lib/utils';
 
 export interface VerseActionBarProps {
   isLiked?: boolean;
   likeCount?: number;
   isBookmarked?: boolean;
   notesCount?: number;
+  className?: string;
   onLikeToggle?: () => void;
   onBookmarkToggle?: () => void;
   onOpenNotes?: () => void;
@@ -18,6 +20,7 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
   likeCount = 0,
   isBookmarked = false,
   notesCount = 0,
+  className,
   onLikeToggle,
   onBookmarkToggle,
   onOpenNotes,
@@ -26,7 +29,10 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
   return (
     <aside
       aria-label="Acciones del versiculo"
-      className="absolute bottom-28 right-4 sm:right-8 z-20 flex flex-col items-center gap-4 select-none"
+      className={cn(
+        'fixed bottom-28 right-4 sm:right-8 z-30 flex flex-col items-center gap-4 select-none pointer-events-auto',
+        className
+      )}
     >
       {/* Me gusta */}
       <IconButton

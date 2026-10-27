@@ -62,6 +62,7 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 * **ADR-004 (Estilo Monocromatico Editorial):** Uso de negro puro #000000 y blanco puro #ffffff con tipografia Newsreader Serif para los versiculos e Inter Sans para los elementos de navegacion y metadatos.
 * **ADR-005 (Cero Emojis y Sobriedad):** Prohibicion de emojis en codigo, UI y documentacion para garantizar un diseno visual y tecnico formal.
 * **ADR-006 (Exclusion de Modulo de Audio):** Exclusion deliberada del componente de narracion de voz para mantener la aplicacion ligera y centrada en lectura y meditacion textual.
+* **ADR-007 (Barra de Acciones HUD Persistente):** Extraccion de la barra de acciones fuera de las tarjetas de versiculos para mantenerla fija en la pantalla durante el desplazamiento. Sincronizacion reactiva del versiculo activo mediante IntersectionObserver (umbral 0.6) para asegurar que unicamente el contenido textual se desplace verticalmente.
 
 ---
 

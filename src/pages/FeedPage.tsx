@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { Verse, VerseNote } from '@/types/bible';
 import { FeedLayout } from '@/components/templates/FeedLayout';
 import { VerseCard } from '@/components/organisms/VerseCard';
+import { VerseActionBar } from '@/components/molecules/VerseActionBar';
 import { NotesModal } from '@/components/organisms/NotesModal';
 import { TopBar } from '@/components/organisms/TopBar';
 import { BookExplorerModal } from '@/components/organisms/BookExplorerModal';
@@ -70,6 +71,8 @@ const INITIAL_VERSES: Verse[] = [
 export const FeedPage: React.FC = () => {
   const [verses] = useState<Verse[]>(INITIAL_VERSES);
   const [currentVersion, setCurrentVersion] = useState<string>('RVR09');
+  const [activeVerseId, setActiveVerseId] = useState<string>(INITIAL_VERSES[0].id);
+
   const [likedVerseIds, setLikedVerseIds] = useState<Set<string>>(new Set());
   const [bookmarkedVerseIds, setBookmarkedVerseIds] = useState<Set<string>>(new Set(['flp-4-13']));
   const [notes, setNotes] = useState<VerseNote[]>([
@@ -99,6 +102,39 @@ export const FeedPage: React.FC = () => {
   const [activeVerseForNotes, setActiveVerseForNotes] = useState<Verse | null>(null);
   const [isExplorerOpen, setIsExplorerOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const feedContainerRef = useRef<HTMLDivElement>(null);
+
+  // Observador para detectar que versiculo esta centrado en pantalla
+  useEffect(() => {
+    const container = feedContainerRef.current;
+    if (!container) return;
+
+    const cards = container.querySelectorAll('.verse-snap-card');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('data-verse-id');
+            if (id) {
+              setActiveVerseId(id);
+            }
+          }
+        }
+      },
+      {
+        root: container,
+        threshold: 0.6,
+      }
+    );
+
+    cards.forEach((card) => observer.observe(card));
+
+    return () => observer.disconnect();
+  }, [verses]);
+
+  // Versiculo activo actualmente enfocado
+  const activeVerse = verses.find((v) => v.id === activeVerseId) || verses[0];
 
   const handleLikeToggle = (verseId: string) => {
     setLikedVerseIds((prev) => {
@@ -145,6 +181,23 @@ export const FeedPage: React.FC = () => {
     setNotes((prev) => [newNote, ...prev]);
   };
 
+  const handleShare = async (verse: Verse) => {
+    const shareText = `"${verse.text}"\n— ${verse.bookName} ${verse.chapter}:${verse.verseNumber} (${verse.version})\n\nLeido en BibliaApp`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'BibliaApp',
+          text: shareText,
+        });
+      } catch {
+        // cancelacion intencional
+      }
+    } else {
+      await navigator.clipboard.writeText(shareText);
+      alert('Versiculo copiado al portapapeles');
+    }
+  };
+
   const handleVersionCycle = () => {
     const versions = ['RVR09', 'WEB', 'BL95'];
     const nextIndex = (versions.indexOf(currentVersion) + 1) % versions.length;
@@ -163,8 +216,26 @@ export const FeedPage: React.FC = () => {
         onVersionSelect={handleVersionCycle}
       />
 
-      {/* Feed principal de scroll vertical tipo TikTok */}
-      <FeedLayout>
+      {/* Riel flotante lateral persistente (HUD fijo en pantalla) */}
+      {activeVerse && (
+        <VerseActionBar
+          isLiked={likedVerseIds.has(activeVerse.id)}
+          likeCount={
+            activeVerse.likeCount
+              ? activeVerse.likeCount + (likedVerseIds.has(activeVerse.id) ? 1 : 0)
+              : (likedVerseIds.has(activeVerse.id) ? 1 : 0)
+          }
+          isBookmarked={bookmarkedVerseIds.has(activeVerse.id)}
+          notesCount={notes.filter((n) => n.verseId === activeVerse.id).length}
+          onLikeToggle={() => handleLikeToggle(activeVerse.id)}
+          onBookmarkToggle={() => handleBookmarkToggle(activeVerse.id)}
+          onOpenNotes={() => handleOpenNotes(activeVerse.id)}
+          onShare={() => handleShare(activeVerse)}
+        />
+      )}
+
+      {/* Feed principal de scroll vertical snap: solo el versiculo se mueve */}
+      <FeedLayout ref={feedContainerRef}>
         {verses.map((verse) => (
           <VerseCard
             key={verse.id}
@@ -173,11 +244,7 @@ export const FeedPage: React.FC = () => {
               version: currentVersion,
             }}
             isLiked={likedVerseIds.has(verse.id)}
-            isBookmarked={bookmarkedVerseIds.has(verse.id)}
-            notesCount={notes.filter((n) => n.verseId === verse.id).length}
             onLikeToggle={handleLikeToggle}
-            onBookmarkToggle={handleBookmarkToggle}
-            onOpenNotes={handleOpenNotes}
             onVersionToggle={handleVersionCycle}
           />
         ))}

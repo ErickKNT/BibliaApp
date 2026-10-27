@@ -1,34 +1,24 @@
 import React, { useState } from 'react';
 import type { Verse } from '@/types/bible';
-import { VerseActionBar } from '@/components/molecules/VerseActionBar';
 import { Heart, BookOpen, ArrowUp, Repeat } from 'lucide-react';
 
 export interface VerseCardProps {
   verse: Verse;
   isLiked?: boolean;
-  isBookmarked?: boolean;
-  notesCount?: number;
-  availableVersions?: string[];
   onLikeToggle?: (verseId: string) => void;
-  onBookmarkToggle?: (verseId: string) => void;
-  onOpenNotes?: (verseId: string) => void;
   onVersionToggle?: () => void;
 }
 
 export const VerseCard: React.FC<VerseCardProps> = ({
   verse,
   isLiked = false,
-  isBookmarked = false,
-  notesCount = 0,
   onLikeToggle,
-  onBookmarkToggle,
-  onOpenNotes,
   onVersionToggle,
 }) => {
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const [lastTap, setLastTap] = useState<number>(0);
 
-  // Doble toque para dar Me gusta estilo TikTok
+  // Doble toque en cualquier parte del versiculo para dar Me gusta
   const handleTap = () => {
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 300;
@@ -42,31 +32,15 @@ export const VerseCard: React.FC<VerseCardProps> = ({
     setLastTap(now);
   };
 
-  const handleShare = async () => {
-    const shareText = `"${verse.text}"\n— ${verse.bookName} ${verse.chapter}:${verse.verseNumber} (${verse.version})\n\nLeido en BibliaApp`;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'BibliaApp',
-          text: shareText,
-        });
-      } catch {
-        // Cancelacion intencional del usuario
-      }
-    } else {
-      await navigator.clipboard.writeText(shareText);
-      alert('Versiculo copiado al portapapeles');
-    }
-  };
-
   const chapterDisplay = verse.chapterContext || `${verse.bookName.toUpperCase()} · CAP. ${verse.chapter}`;
 
   return (
     <article
+      data-verse-id={verse.id}
       onClick={handleTap}
-      className="relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden bg-[#131315] px-6 sm:px-12 pt-16 pb-6 snap-start select-none"
+      className="verse-snap-card relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden bg-[#131315] px-6 sm:px-12 pt-16 pb-6 snap-start select-none"
     >
-      {/* Resplandor ambiental de profundidad sutil */}
+      {/* Resplandor ambiental de profundidad */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-25">
         <div className="w-80 h-80 rounded-full bg-[#353437] blur-[110px]" />
       </div>
@@ -80,7 +54,6 @@ export const VerseCard: React.FC<VerseCardProps> = ({
 
       {/* Fila superior: Contexto del capitulo y conmutador rapido de version */}
       <div className="relative z-10 w-full flex items-center justify-between pt-2">
-        {/* Capsula de capitulo */}
         <div className="flex items-center gap-2 bg-[#1c1b1d]/85 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/5 shadow-sm">
           <BookOpen className="h-3.5 w-3.5 text-white/70" />
           <span className="text-xs font-semibold tracking-wider text-white">
@@ -88,7 +61,6 @@ export const VerseCard: React.FC<VerseCardProps> = ({
           </span>
         </div>
 
-        {/* Chip de conmutacion rapida de traduccion */}
         <button
           type="button"
           onClick={(e) => {
@@ -105,7 +77,7 @@ export const VerseCard: React.FC<VerseCardProps> = ({
       </div>
 
       {/* Bloque central de lectura: tipografia editorial serif */}
-      <main className="relative z-10 my-auto py-6 flex flex-col items-start pr-16 max-w-2xl">
+      <main className="relative z-10 my-auto py-6 flex flex-col items-start pr-20 max-w-2xl">
         <blockquote className="text-left font-serif text-2xl sm:text-4xl md:text-5xl font-normal leading-[1.3] text-white tracking-tight drop-shadow-sm">
           “{verse.text}”
         </blockquote>
@@ -129,23 +101,11 @@ export const VerseCard: React.FC<VerseCardProps> = ({
         </div>
       </main>
 
-      {/* Riel flotante lateral de acciones (TikTok / Reels) */}
-      <VerseActionBar
-        isLiked={isLiked}
-        likeCount={verse.likeCount ? verse.likeCount + (isLiked ? 1 : 0) : (isLiked ? 1 : 0)}
-        isBookmarked={isBookmarked}
-        notesCount={notesCount || verse.notesCount || 0}
-        onLikeToggle={() => onLikeToggle?.(verse.id)}
-        onBookmarkToggle={() => onBookmarkToggle?.(verse.id)}
-        onOpenNotes={() => onOpenNotes?.(verse.id)}
-        onShare={handleShare}
-      />
-
       {/* Indicador inferior de avance y deslizamiento */}
       <div className="relative z-10 w-full flex flex-col items-center justify-center pb-2">
         <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1c1b1d]/70 backdrop-blur-md border border-white/5">
           <span className="text-[11px] font-medium tracking-wider text-white/60">
-            Desliza para versiculo {verse.verseNumber + 1}
+            Desliza para versiculo siguiente
           </span>
           <ArrowUp className="h-3 w-3 text-white animate-bounce" />
         </div>
