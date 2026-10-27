@@ -7,6 +7,10 @@ export interface Verse {
   text: string;
   version: string;
   globalOrder: number;
+  chapterContext?: string;
+  historicalContext?: string;
+  likeCount?: number;
+  notesCount?: number;
 }
 
 export interface VerseLike {
@@ -20,6 +24,8 @@ export interface VerseNote {
   verseId: string;
   userId: string;
   content: string;
+  isPrivate?: boolean;
+  category?: 'personal' | 'comunidad' | 'referencia';
   createdAt: string;
   updatedAt: string;
 }
@@ -32,3 +38,9 @@ export interface BibleVersion {
   language: string;
 }
 
+export interface BibleBook {
+  name: string;
+  testament: 'antiguo' | 'nuevo';
+  chaptersCount: number;
+  category: string;
+}

@@ -22,10 +22,10 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       >
         <div
           className={cn(
-            'flex h-12 w-12 items-center justify-center rounded-full transition-colors backdrop-blur-sm',
+            'flex h-12 w-12 items-center justify-center rounded-full transition-all backdrop-blur-xl shadow-lg border border-white/5',
             active
               ? 'bg-white text-black'
-              : 'bg-white/10 text-white hover:bg-white/20 active:bg-white/30'
+              : 'bg-[#201f22]/90 text-white/90 hover:text-white hover:bg-[#2a2a2c] active:bg-[#353437]'
           )}
         >
           {children}
@@ -36,7 +36,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
           </span>
         )}
         {badge !== undefined && (
-          <span className="text-[11px] font-semibold text-white/80">
+          <span className="text-[11px] font-semibold text-white/90">
             {badge}
           </span>
         )}
@@ -46,4 +46,3 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
 );
 
 IconButton.displayName = 'IconButton';
-

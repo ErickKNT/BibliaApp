@@ -46,12 +46,22 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
   * Actualizacion del grafo de conocimiento (Graphify) tras cambios estructurales.
   * Politica estricta de cero emojis en toda la documentacion y en textos de la aplicacion.
 
+* **Fusion de Diseno Google Stitch (Hito 4)**:
+  * Integracion del riel de acciones refinado (Me gusta con conteo, Notas, Guardar con marcador y Compartir tarjeta). Se omitio intencionalmente la funcion de voz/audio segun especificacion directa.
+  * Inyeccion de contexto historico y teologico en tarjetas de versiculos (insignia de contexto, capsula de capitulo superior y chip de conmutacion rapida de version).
+  * Redisenado de `NotesModal` como bottom drawer con efecto de velo desenfocado, barra de agarre superior, clasificacion de notas (Privada/Compartir) y filtros (Todas, Mis Notas, Comunidad).
+  * Creacion de `TopBar` con acceso al explorador de libros, selector de version biblica y perfil.
+  * Creacion de `BookExplorerModal` con segmentacion Antiguo/Nuevo Testamento, conteo de capitulos y buscador en tiempo real.
+  * Creacion de `ProfileModal` con rastreador de racha de lectura, estado de sincronizacion PWA offline, coleccion de versiculos guardados y ajustes de tamano de tipografia.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
 * **ADR-003 (Rendimiento del Feed):** Uso de CSS Snap Scroll (snap-y mandatory) apoyado por virtualizacion ligera para evitar saturar el DOM con los 31,102 versiculos de la Biblia.
 * **ADR-004 (Estilo Monocromatico Editorial):** Uso de negro puro #000000 y blanco puro #ffffff con tipografia Newsreader Serif para los versiculos e Inter Sans para los elementos de navegacion y metadatos.
 * **ADR-005 (Cero Emojis y Sobriedad):** Prohibicion de emojis en codigo, UI y documentacion para garantizar un diseno visual y tecnico formal.
+* **ADR-006 (Exclusion de Modulo de Audio):** Exclusion deliberada del componente de narracion de voz para mantener la aplicacion ligera y centrada en lectura y meditacion textual.
 
 ---
 
@@ -61,7 +71,7 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 - [x] **Hito 1:** Scaffolding inicial (Vite + React + TypeScript + Tailwind CSS + Configuracion de fuentes y diseno monocromatico).
 - [x] **Hito 2:** Estructura de carpetas Atomic Design y componentes base (IconButton, Badge, VerseActionBar, VerseCard, NotesModal).
 - [x] **Hito 3:** Prototipo del Feed Snap Scroll a pantalla completa con datos de prueba (RVR09) y soporte de interaccion tactil.
-- [ ] **Hito 4:** Evaluacion y fusion de componentes visuales de Google Stitch (contexto historico, selector rapido de traduccion, explorador de libros, indicador PWA).
+- [x] **Hito 4:** Evaluacion y fusion de componentes visuales de Google Stitch (contexto historico, selector rapido de traduccion, explorador de libros, indicador PWA, omitiendo audio).
 - [ ] **Hito 5:** Configuracion de Supabase (tablas verses, verse_likes, verse_notes, RLS, migracion de textos libres).
 - [ ] **Hito 6:** Conexion del cliente Supabase a la UI (persistencia real de notas y likes con sesion anonima).
 - [ ] **Hito 7:** Configuracion de PWA (Service Worker, manifiesto, lectura offline).
