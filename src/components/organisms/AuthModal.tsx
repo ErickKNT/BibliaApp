@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { X, Mail, Lock, User, ArrowRight, Loader2, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import {
+  X,
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import { signUpWithEmail, signInWithEmail, sendPasswordReset } from '@/services/authService';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -20,6 +32,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -29,10 +44,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setView(initialView);
       setErrorMessage(null);
       setSuccessMessage(null);
+      setPassword('');
+      setConfirmPassword('');
+      setShowPassword(false);
+      setShowConfirmPassword(false);
     }
   }, [isOpen, initialView]);
 
   if (!isOpen) return null;
+
+  const handleSwitchView = (nextView: 'login' | 'register' | 'recovery') => {
+    setView(nextView);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setPassword('');
+    setConfirmPassword('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,12 +81,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           setIsLoading(false);
           return;
         }
+        if (password !== confirmPassword) {
+          setErrorMessage('Las contraseñas no coinciden. Por favor verifícalas');
+          setIsLoading(false);
+          return;
+        }
 
         const { user, error } = await signUpWithEmail(email.trim(), password, name.trim());
         if (error) {
           setErrorMessage(error);
         } else if (user) {
-          setSuccessMessage('¡Cuenta creada y sincronizada exitosamente!');
+          setSuccessMessage('Cuenta creada y sincronizada exitosamente');
           setTimeout(() => {
             onAuthSuccess(user);
             onClose();
@@ -68,7 +102,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         if (error) {
           setErrorMessage(error);
         } else if (user) {
-          setSuccessMessage('¡Sesión iniciada correctamente!');
+          setSuccessMessage('Sesión iniciada correctamente');
           setTimeout(() => {
             onAuthSuccess(user);
             onClose();
@@ -136,7 +170,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {errorMessage && (
           <div className="mx-6 mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0" />
-            <span>{errorMessage}</span>
+            <span className="leading-snug">{errorMessage}</span>
           </div>
         )}
 
@@ -186,36 +220,70 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           {view !== 'recovery' && (
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-black/70 dark:text-white/70">
-                  Contraseña
-                </label>
-                {view === 'login' && (
+            <>
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-black/70 dark:text-white/70">
+                    Contraseña
+                  </label>
+                  {view === 'login' && (
+                    <button
+                      type="button"
+                      onClick={() => handleSwitchView('recovery')}
+                      className="text-[11px] text-black/50 hover:text-black dark:text-white/50 dark:hover:text-white underline"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-3 h-4 w-4 text-black/40 dark:text-white/40" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                    className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-[#edece6] dark:bg-[#201f22] py-2.5 pl-10 pr-10 text-xs sm:text-sm text-black dark:text-white placeholder-black/40 dark:placeholder-white/40 focus:border-black dark:focus:border-white focus:outline-none"
+                  />
                   <button
                     type="button"
-                    onClick={() => {
-                      setErrorMessage(null);
-                      setView('recovery');
-                    }}
-                    className="text-[11px] text-black/50 hover:text-black dark:text-white/50 dark:hover:text-white underline"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 text-black/40 hover:text-black dark:text-white/40 dark:hover:text-white transition-colors p-1"
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
                   >
-                    ¿Olvidaste tu contraseña?
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
-                )}
+                </div>
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-3 h-4 w-4 text-black/40 dark:text-white/40" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-[#edece6] dark:bg-[#201f22] py-2.5 pl-10 pr-4 text-xs sm:text-sm text-black dark:text-white placeholder-black/40 dark:placeholder-white/40 focus:border-black dark:focus:border-white focus:outline-none"
-                />
-              </div>
-            </div>
+
+              {view === 'register' && (
+                <div>
+                  <label className="text-xs font-semibold text-black/70 dark:text-white/70 block mb-1.5">
+                    Confirmar Contraseña
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-3 h-4 w-4 text-black/40 dark:text-white/40" />
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Repite tu contraseña"
+                      className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-[#edece6] dark:bg-[#201f22] py-2.5 pl-10 pr-10 text-xs sm:text-sm text-black dark:text-white placeholder-black/40 dark:placeholder-white/40 focus:border-black dark:focus:border-white focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-2.5 text-black/40 hover:text-black dark:text-white/40 dark:hover:text-white transition-colors p-1"
+                      aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           <button
@@ -245,10 +313,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               ¿Ya tienes una cuenta?{' '}
               <button
                 type="button"
-                onClick={() => {
-                  setErrorMessage(null);
-                  setView('login');
-                }}
+                onClick={() => handleSwitchView('login')}
                 className="font-bold text-black dark:text-white underline hover:opacity-80"
               >
                 Inicia sesión aquí
@@ -259,10 +324,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               ¿Aún no tienes cuenta?{' '}
               <button
                 type="button"
-                onClick={() => {
-                  setErrorMessage(null);
-                  setView('register');
-                }}
+                onClick={() => handleSwitchView('register')}
                 className="font-bold text-black dark:text-white underline hover:opacity-80"
               >
                 Regístrate gratis
@@ -273,10 +335,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               ¿Recordaste tu contraseña?{' '}
               <button
                 type="button"
-                onClick={() => {
-                  setErrorMessage(null);
-                  setView('login');
-                }}
+                onClick={() => handleSwitchView('login')}
                 className="font-bold text-black dark:text-white underline hover:opacity-80"
               >
                 Volver a Iniciar Sesión
