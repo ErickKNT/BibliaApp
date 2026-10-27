@@ -150,6 +150,13 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
     * `FeedPage.tsx`: conexion completa de estados de autenticacion, oyente en tiempo real de sesion y sincronizacion bidireccional.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Mejoras de Seguridad en Formulario de Autenticacion y Diagnostico de Proveedor (Hito 6.11 - Rama feature/auth-password-verification)**:
+  * Creacion de la rama de trabajo `feature/auth-password-verification`.
+  * Incorporacion de alternancia de visibilidad de contrasena (iconos Eye y EyeOff de Lucide) en los campos de credenciales.
+  * Adicion del campo de verificacion/confirmacion obligatoria de contrasena en la vista de registro, con validacion en cliente de coincidencia y longitud minima antes del envio.
+  * Implementacion de la funcion traductora y explicativa `formatAuthError` en `src/services/authService.ts` para transformar mensajes en ingles de Supabase a orientaciones claras en espanol (incluyendo la solucion para "Email signups are disabled").
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.

@@ -15,6 +15,32 @@ export interface AuthResponse {
 }
 
 /**
+ * Traduce y contextualiza los mensajes de error devueltos por Supabase Auth en espanol.
+ */
+export function formatAuthError(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes('email signups are disabled')) {
+    return 'El registro por correo está deshabilitado en Supabase. Activa la opción "Allow new users to sign up" en Authentication > Providers > Email de tu Supabase Dashboard.';
+  }
+  if (lower.includes('user already registered') || lower.includes('already exists')) {
+    return 'Este correo electrónico ya está registrado. Por favor inicia sesión.';
+  }
+  if (lower.includes('invalid login credentials')) {
+    return 'Correo o contraseña incorrectos. Por favor verifica tus datos.';
+  }
+  if (lower.includes('email not confirmed')) {
+    return 'Correo pendiente de confirmación. Revisa tu bandeja de entrada o desactiva la confirmación obligatoria en Supabase.';
+  }
+  if (lower.includes('password should be at least')) {
+    return 'La contraseña debe tener al menos 6 caracteres.';
+  }
+  if (lower.includes('rate limit')) {
+    return 'Se ha superado el límite de intentos. Por favor espera unos minutos.';
+  }
+  return message;
+}
+
+/**
  * Registra una nueva cuenta con correo y contrasena en Supabase.
  */
 export async function signUpWithEmail(
@@ -48,7 +74,7 @@ export async function signUpWithEmail(
     });
 
     if (error) {
-      return { user: null, error: error.message };
+      return { user: null, error: formatAuthError(error.message) };
     }
 
     if (data.user) {
@@ -58,7 +84,7 @@ export async function signUpWithEmail(
 
     return { user: data.user, error: null };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Error al registrar la cuenta';
+    const message = err instanceof Error ? formatAuthError(err.message) : 'Error al registrar la cuenta';
     return { user: null, error: message };
   }
 }
@@ -83,7 +109,7 @@ export async function signInWithEmail(email: string, pass: string): Promise<Auth
     });
 
     if (error) {
-      return { user: null, error: error.message };
+      return { user: null, error: formatAuthError(error.message) };
     }
 
     if (data.user) {
@@ -93,7 +119,7 @@ export async function signInWithEmail(email: string, pass: string): Promise<Auth
 
     return { user: data.user, error: null };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Error al iniciar sesion';
+    const message = err instanceof Error ? formatAuthError(err.message) : 'Error al iniciar sesion';
     return { user: null, error: message };
   }
 }
@@ -125,12 +151,12 @@ export async function sendPasswordReset(email: string): Promise<{ success: boole
     });
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: formatAuthError(error.message) };
     }
 
     return { success: true, error: null };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Error al solicitar recuperacion';
+    const message = err instanceof Error ? formatAuthError(err.message) : 'Error al solicitar recuperacion';
     return { success: false, error: message };
   }
 }
