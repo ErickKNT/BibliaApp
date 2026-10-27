@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Verse, VerseNote } from '@/types/bible';
 import type { ReadingStreakData, StreakDay, UserProfileData } from '@/services/streakService';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
   X,
   Flame,
@@ -18,11 +19,15 @@ import {
   Edit2,
   CheckCircle2,
   ShieldCheck,
+  Sparkles,
+  LogOut,
+  LogIn,
 } from 'lucide-react';
 
 export interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
+  currentUser?: SupabaseUser | null;
   streakData: ReadingStreakData;
   weeklyDays: StreakDay[];
   userProfile: UserProfileData;
@@ -35,6 +40,8 @@ export interface ProfileModalProps {
   onSelectVersion: (version: string) => void;
   onSelectFontSize: (size: 'normal' | 'grande' | 'extra') => void;
   onSelectTheme: (theme: 'dark' | 'light' | 'system') => void;
+  onOpenAuth?: (view: 'login' | 'register') => void;
+  onSignOut?: () => void;
   onNavigateToVerse?: (verse: Verse) => void;
   onRemoveBookmark?: (verseId: string) => void;
 }
@@ -42,6 +49,7 @@ export interface ProfileModalProps {
 export const ProfileModal: React.FC<ProfileModalProps> = ({
   isOpen,
   onClose,
+  currentUser,
   streakData,
   weeklyDays,
   userProfile,
@@ -54,6 +62,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   onSelectVersion,
   onSelectFontSize,
   onSelectTheme,
+  onOpenAuth,
+  onSignOut,
   onNavigateToVerse,
   onRemoveBookmark,
 }) => {
@@ -71,6 +81,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     }
   };
 
+  const isRegisteredUser = Boolean(currentUser && !currentUser.is_anonymous);
   const userInitial = (userProfile.name.trim()[0] || 'L').toUpperCase();
 
   return (
@@ -127,7 +138,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               )}
               <span className="text-[11px] text-black/50 dark:text-white/50 mt-1 flex items-center gap-1">
                 <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                Sesión Supabase activa y sincronizada
+                {isRegisteredUser
+                  ? `Cuenta: ${currentUser?.email}`
+                  : 'Lector Local (Sesión Segura)'}
               </span>
             </div>
           </div>
@@ -139,6 +152,30 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             <X className="h-5 w-5" />
           </button>
         </div>
+
+        {/* Banner sutil para invitar al registro si no tiene cuenta vinculada */}
+        {!isRegisteredUser && (
+          <div className="mx-4 sm:mx-6 mt-3 p-3.5 rounded-2xl border border-black/10 dark:border-white/10 bg-[#edece6] dark:bg-[#1c1b1d] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left shrink-0 shadow-xs">
+            <div className="flex items-start gap-2.5">
+              <Sparkles className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-xs font-bold text-black dark:text-white block leading-tight">
+                  Protege tu constancia en la nube
+                </span>
+                <span className="text-[11px] text-black/60 dark:text-white/60 block mt-0.5 leading-relaxed">
+                  Crea tu cuenta gratuita para respaldar tu racha de {streakData.currentStreak} {streakData.currentStreak === 1 ? 'día' : 'días'} y tus notas en cualquier dispositivo.
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => onOpenAuth?.('register')}
+              className="self-start sm:self-auto shrink-0 px-3.5 py-1.5 rounded-xl bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 text-xs font-bold transition-all shadow-xs"
+            >
+              Crear Cuenta
+            </button>
+          </div>
+        )}
 
         {/* Tarjetas resumen de actividad */}
         <div className="p-4 sm:p-5 grid grid-cols-3 gap-2.5 border-b border-black/5 dark:border-white/5 bg-[#f5f4ef] dark:bg-[#171618] shrink-0">
@@ -439,6 +476,54 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           {/* Pestana 4: Ajustes */}
           {activeTab === 'ajustes' && (
             <div className="space-y-5 sm:space-y-6">
+              {/* Accion de cuenta: Iniciar sesion o Cerrar sesion */}
+              <div className="p-4 rounded-2xl border border-black/5 dark:border-white/5 bg-[#f5f4ef] dark:bg-[#171618]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-black dark:text-white">
+                    Cuenta de Usuario
+                  </span>
+                  {isRegisteredUser ? (
+                    <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                      Sincronizada
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-semibold text-black/50 dark:text-white/50 bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-full">
+                      Modo Invitado
+                    </span>
+                  )}
+                </div>
+
+                {isRegisteredUser ? (
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xs text-black/60 dark:text-white/60">
+                      {currentUser?.email}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onSignOut?.()}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      <span>Cerrar Sesión</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-[11px] text-black/50 dark:text-white/50">
+                      Tus datos se guardan localmente.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onOpenAuth?.('login')}
+                      className="flex items-center gap-1.5 text-xs font-bold text-black dark:text-white bg-black/10 dark:bg-white/10 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black px-3 py-1.5 rounded-xl transition-all"
+                    >
+                      <LogIn className="h-3.5 w-3.5" />
+                      <span>Iniciar Sesión / Registro</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {/* Tema de apariencia */}
               <div>
                 <span className="text-xs font-semibold text-black/70 dark:text-white/70 block mb-2">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Flame, Sparkles, BookOpen, ArrowRight, Check } from 'lucide-react';
+import { X, Flame, Sparkles, BookOpen, ArrowRight, Check, ShieldCheck } from 'lucide-react';
 import type { StreakDay } from '@/services/streakService';
 
 export interface WelcomeModalProps {
@@ -7,6 +7,7 @@ export interface WelcomeModalProps {
   userName: string;
   streak: number;
   isStreakCompletedToday: boolean;
+  isRegisteredUser?: boolean;
   weeklyDays: StreakDay[];
   lastReading: {
     bookName: string;
@@ -14,7 +15,7 @@ export interface WelcomeModalProps {
   };
   onClose: () => void;
   onResumeReading: () => void;
-  onExploreDailyVerse?: () => void;
+  onOpenAuth?: (view: 'login' | 'register') => void;
 }
 
 // Versiculo diario inspiracional
@@ -31,10 +32,12 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   userName,
   streak,
   isStreakCompletedToday,
+  isRegisteredUser = false,
   weeklyDays,
   lastReading,
   onClose,
   onResumeReading,
+  onOpenAuth,
 }) => {
   if (!isOpen) return null;
 
@@ -183,15 +186,33 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
           </div>
         </div>
 
-        {/* Pie con boton principal de inicio */}
-        <div className="border-t border-black/5 dark:border-white/5 bg-[#f5f4ef] dark:bg-[#171618] px-6 py-3.5 flex items-center justify-between shrink-0">
-          <span className="text-xs text-black/50 dark:text-white/50">
-            Desliza para continuar tu lectura
-          </span>
+        {/* Pie con boton principal de inicio e invitacion sutil */}
+        <div className="border-t border-black/5 dark:border-white/5 bg-[#f5f4ef] dark:bg-[#171618] px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0">
+          {!isRegisteredUser && onOpenAuth ? (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onOpenAuth('register');
+              }}
+              className="text-left text-[11px] text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors"
+            >
+              ¿Quieres respaldar tu racha?{' '}
+              <span className="font-bold underline text-black dark:text-white">
+                Crea una cuenta gratis
+              </span>
+            </button>
+          ) : (
+            <span className="text-[11px] text-black/50 dark:text-white/50 flex items-center gap-1">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+              Progreso sincronizado en la nube
+            </span>
+          )}
+
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-2 rounded-xl bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 px-4 py-2 text-xs font-bold transition-all active:scale-95 shadow-sm"
+            className="self-end sm:self-auto flex items-center gap-2 rounded-xl bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 px-4 py-2 text-xs font-bold transition-all active:scale-95 shadow-sm"
           >
             <span>Comenzar</span>
             <ArrowRight className="h-3.5 w-3.5" />
