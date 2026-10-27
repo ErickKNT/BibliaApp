@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+__pycache__/
+*.pyc
+
+# Graphify generated assets (re-generated on demand)
+graphify-out/
+
+# Environment and local settings
+.env
+.env.local
+*.local
+
+# OS files
+Thumbs.db
+.DS_Store
