@@ -245,3 +245,4 @@ export async function addVerseNote(
     return newNoteData;
   }
 }
+

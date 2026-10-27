@@ -110,3 +110,4 @@ create policy "Users can delete their own notes"
   on public.verse_notes
   for delete
   using (auth.uid() = user_id);
+

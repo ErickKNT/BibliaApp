@@ -30,3 +30,4 @@ values
   ('Genesis', 1, 1, 2, 'Y la tierra estaba desordenada y vacia, y las tinieblas estaban sobre la haz del abismo, y el Espiritu de Dios se movia sobre la haz de las aguas.', 'RVR09', 'GENESIS · CAP. 1', 'Contexto: Estado primordial antes de la ordenacion divina', 2),
   ('Genesis', 1, 1, 3, 'Y dijo Dios: Sea la luz: y fue la luz.', 'RVR09', 'GENESIS · CAP. 1', 'Contexto: El poder creador de la palabra', 3)
 on conflict (version, book_order, chapter, verse_number) do nothing;
+
