@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { Verse, VerseNote } from '@/types/bible';
 import { FeedLayout } from '@/components/templates/FeedLayout';
 import { VerseCard } from '@/components/organisms/VerseCard';
@@ -7,96 +7,21 @@ import { NotesModal } from '@/components/organisms/NotesModal';
 import { TopBar } from '@/components/organisms/TopBar';
 import { BookExplorerModal } from '@/components/organisms/BookExplorerModal';
 import { ProfileModal } from '@/components/organisms/ProfileModal';
-
-// Versiculos iniciales de demostracion (Dominio Publico)
-const INITIAL_VERSES: Verse[] = [
-  {
-    id: 'flp-4-13',
-    bookName: 'Filipenses',
-    bookOrder: 50,
-    chapter: 4,
-    verseNumber: 13,
-    text: 'Todo lo puedo en Cristo que me fortalece.',
-    version: 'RVR09',
-    globalOrder: 29462,
-    chapterContext: 'FILIPENSES · CAP. 4',
-    historicalContext: 'Contexto: Carta desde prision en Roma',
-    likeCount: 12400,
-    notesCount: 148,
-  },
-  {
-    id: 'jn-1-1',
-    bookName: 'Juan',
-    bookOrder: 43,
-    chapter: 1,
-    verseNumber: 1,
-    text: 'En el principio era el Verbo, y el Verbo era con Dios, y el Verbo era Dios.',
-    version: 'RVR09',
-    globalOrder: 26046,
-    chapterContext: 'JUAN · CAP. 1',
-    historicalContext: 'Contexto: Prologo teologico de la encarnacion',
-    likeCount: 9840,
-    notesCount: 82,
-  },
-  {
-    id: 'jn-1-5',
-    bookName: 'Juan',
-    bookOrder: 43,
-    chapter: 1,
-    verseNumber: 5,
-    text: 'Y la luz en las tinieblas resplandece; mas las tinieblas no la comprendieron.',
-    version: 'RVR09',
-    globalOrder: 26050,
-    chapterContext: 'JUAN · CAP. 1',
-    historicalContext: 'Contexto: La victoria de la luz sobre el cosmos',
-    likeCount: 7120,
-    notesCount: 39,
-  },
-  {
-    id: 'sal-23-1',
-    bookName: 'Salmos',
-    bookOrder: 19,
-    chapter: 23,
-    verseNumber: 1,
-    text: 'Jehova es mi pastor; nada me faltara.',
-    version: 'RVR09',
-    globalOrder: 14241,
-    chapterContext: 'SALMOS · CAP. 23',
-    historicalContext: 'Contexto: Salmo pastoral de David en el desierto',
-    likeCount: 18900,
-    notesCount: 245,
-  },
-];
+import {
+  getFeedVerses,
+  toggleVerseLike,
+  getVerseNotes,
+  addVerseNote,
+} from '@/services/bibleService';
 
 export const FeedPage: React.FC = () => {
-  const [verses] = useState<Verse[]>(INITIAL_VERSES);
+  const [verses, setVerses] = useState<Verse[]>([]);
   const [currentVersion, setCurrentVersion] = useState<string>('RVR09');
-  const [activeVerseId, setActiveVerseId] = useState<string>(INITIAL_VERSES[0].id);
+  const [activeVerseId, setActiveVerseId] = useState<string>('');
 
   const [likedVerseIds, setLikedVerseIds] = useState<Set<string>>(new Set());
-  const [bookmarkedVerseIds, setBookmarkedVerseIds] = useState<Set<string>>(new Set(['flp-4-13']));
-  const [notes, setNotes] = useState<VerseNote[]>([
-    {
-      id: 'note-seed-1',
-      verseId: 'flp-4-13',
-      userId: 'user-1',
-      content: 'Este versiculo no habla de exito material, sino del gozo y contentamiento en cualquier circunstancia.',
-      isPrivate: true,
-      category: 'personal',
-      createdAt: '2026-10-25T10:00:00.000Z',
-      updatedAt: '2026-10-25T10:00:00.000Z',
-    },
-    {
-      id: 'note-seed-2',
-      verseId: 'flp-4-13',
-      userId: 'user-comunidad',
-      content: 'Pablo escribio esto encadenado en Roma, lo cual magnifica la fuerza de su testimonio.',
-      isPrivate: false,
-      category: 'comunidad',
-      createdAt: '2026-10-26T14:30:00.000Z',
-      updatedAt: '2026-10-26T14:30:00.000Z',
-    },
-  ]);
+  const [bookmarkedVerseIds, setBookmarkedVerseIds] = useState<Set<string>>(new Set());
+  const [notes, setNotes] = useState<VerseNote[]>([]);
 
   // Modales
   const [activeVerseForNotes, setActiveVerseForNotes] = useState<Verse | null>(null);
@@ -105,10 +30,34 @@ export const FeedPage: React.FC = () => {
 
   const feedContainerRef = useRef<HTMLDivElement>(null);
 
+  // Carga de versiculos segun traduccion activa
+  const loadVerses = useCallback(async (version: string) => {
+    const data = await getFeedVerses(version);
+    setVerses(data);
+    if (data.length > 0) {
+      setActiveVerseId(data[0].id);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadVerses(currentVersion);
+
+    // Cargar likes y marcadores locales previos si existen
+    try {
+      const localLikes = JSON.parse(localStorage.getItem('biblia_likes') || '[]');
+      setLikedVerseIds(new Set(localLikes));
+
+      const localBookmarks = JSON.parse(localStorage.getItem('biblia_bookmarks') || '[]');
+      setBookmarkedVerseIds(new Set(localBookmarks));
+    } catch {
+      // Ignorar errores de lectura local
+    }
+  }, [currentVersion, loadVerses]);
+
   // Observador para detectar que versiculo esta centrado en pantalla
   useEffect(() => {
     const container = feedContainerRef.current;
-    if (!container) return;
+    if (!container || verses.length === 0) return;
 
     const cards = container.querySelectorAll('.verse-snap-card');
     const observer = new IntersectionObserver(
@@ -136,13 +85,28 @@ export const FeedPage: React.FC = () => {
   // Versiculo activo actualmente enfocado
   const activeVerse = verses.find((v) => v.id === activeVerseId) || verses[0];
 
-  const handleLikeToggle = (verseId: string) => {
+  const handleLikeToggle = async (verseId: string) => {
+    const isCurrentlyLiked = likedVerseIds.has(verseId);
+    
+    // Actualizacion optimista inmediata
     setLikedVerseIds((prev) => {
       const next = new Set(prev);
-      if (next.has(verseId)) {
+      if (isCurrentlyLiked) {
         next.delete(verseId);
       } else {
         next.add(verseId);
+      }
+      return next;
+    });
+
+    // Persistir en Supabase / LocalStorage
+    const finalLikedState = await toggleVerseLike(verseId, isCurrentlyLiked);
+    setLikedVerseIds((prev) => {
+      const next = new Set(prev);
+      if (finalLikedState) {
+        next.add(verseId);
+      } else {
+        next.delete(verseId);
       }
       return next;
     });
@@ -156,29 +120,25 @@ export const FeedPage: React.FC = () => {
       } else {
         next.add(verseId);
       }
+      localStorage.setItem('biblia_bookmarks', JSON.stringify(Array.from(next)));
       return next;
     });
   };
 
-  const handleOpenNotes = (verseId: string) => {
+  const handleOpenNotes = async (verseId: string) => {
     const verse = verses.find((v) => v.id === verseId);
     if (verse) {
       setActiveVerseForNotes(verse);
+      const verseNotes = await getVerseNotes(verseId);
+      setNotes(verseNotes);
     }
   };
 
-  const handleSaveNote = (verseId: string, content: string, isPrivate: boolean) => {
-    const newNote: VerseNote = {
-      id: `note-${Date.now()}`,
-      verseId,
-      userId: 'anonymous-user',
-      content,
-      isPrivate,
-      category: isPrivate ? 'personal' : 'comunidad',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setNotes((prev) => [newNote, ...prev]);
+  const handleSaveNote = async (verseId: string, content: string, isPrivate: boolean) => {
+    const savedNote = await addVerseNote(verseId, content, isPrivate, isPrivate ? 'personal' : 'comunidad');
+    if (savedNote) {
+      setNotes((prev) => [savedNote, ...prev]);
+    }
   };
 
   const handleShare = async (verse: Verse) => {
@@ -190,7 +150,7 @@ export const FeedPage: React.FC = () => {
           text: shareText,
         });
       } catch {
-        // cancelacion intencional
+        // cancelacion de usuario
       }
     } else {
       await navigator.clipboard.writeText(shareText);
@@ -226,7 +186,7 @@ export const FeedPage: React.FC = () => {
               : (likedVerseIds.has(activeVerse.id) ? 1 : 0)
           }
           isBookmarked={bookmarkedVerseIds.has(activeVerse.id)}
-          notesCount={notes.filter((n) => n.verseId === activeVerse.id).length}
+          notesCount={notes.filter((n) => n.verseId === activeVerse.id).length || activeVerse.notesCount || 0}
           onLikeToggle={() => handleLikeToggle(activeVerse.id)}
           onBookmarkToggle={() => handleBookmarkToggle(activeVerse.id)}
           onOpenNotes={() => handleOpenNotes(activeVerse.id)}
@@ -234,7 +194,7 @@ export const FeedPage: React.FC = () => {
         />
       )}
 
-      {/* Feed principal de scroll vertical snap: solo el versiculo se mueve */}
+      {/* Feed principal de scroll vertical snap */}
       <FeedLayout ref={feedContainerRef}>
         {verses.map((verse) => (
           <VerseCard

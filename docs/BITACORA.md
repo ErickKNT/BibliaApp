@@ -55,6 +55,14 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
   * Creacion de `ProfileModal` con rastreador de racha de lectura, estado de sincronizacion PWA offline, coleccion de versiculos guardados y ajustes de tamano de tipografia.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Persistencia Real y Modelo de Datos en Supabase (Hito 5 y 6)**:
+  * Creacion del esquema SQL de base de datos en `supabase/migrations/20261027000000_create_bible_tables.sql` con tablas `verses`, `verse_likes` y `verse_notes`.
+  * Implementacion de politicas de seguridad RLS: lectura publica para versiculos, control exclusivo por `user_id` para likes y control de privacidad (privada/comunidad) para notas.
+  * Inyeccion de datos de siembra iniciales en `supabase/seed.sql` con versiculos de Filipenses 4, Juan 1, Salmos 23 y Genesis 1 (Reina-Valera 1909 - Dominio Publico) con metadatos de contexto historico y teologico.
+  * Creacion de `.env.example` y cliente en `src/lib/supabase.ts` con soporte de sesion anonima progresiva y fallback de desarrollo offline sin bloqueos.
+  * Implementacion del servicio de datos `src/services/bibleService.ts` conectando la interfaz de React con Supabase y respaldo en LocalStorage.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
@@ -63,6 +71,7 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 * **ADR-005 (Cero Emojis y Sobriedad):** Prohibicion de emojis en codigo, UI y documentacion para garantizar un diseno visual y tecnico formal.
 * **ADR-006 (Exclusion de Modulo de Audio):** Exclusion deliberada del componente de narracion de voz para mantener la aplicacion ligera y centrada en lectura y meditacion textual.
 * **ADR-007 (Barra de Acciones HUD Persistente):** Extraccion de la barra de acciones fuera de las tarjetas de versiculos para mantenerla fija en la pantalla durante el desplazamiento. Sincronizacion reactiva del versiculo activo mediante IntersectionObserver (umbral 0.6) para asegurar que unicamente el contenido textual se desplace verticalmente.
+* **ADR-008 (Arquitectura Hibrida Supabase con Respaldo Offline Local):** El cliente de datos conmuta de forma transparente entre Supabase (si las credenciales estan activas) y almacenamiento local / datos de respaldo si no hay conexion o credenciales configuradas, evitando excepciones no controladas.
 
 ---
 
@@ -73,6 +82,6 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 - [x] **Hito 2:** Estructura de carpetas Atomic Design y componentes base (IconButton, Badge, VerseActionBar, VerseCard, NotesModal).
 - [x] **Hito 3:** Prototipo del Feed Snap Scroll a pantalla completa con datos de prueba (RVR09) y soporte de interaccion tactil.
 - [x] **Hito 4:** Evaluacion y fusion de componentes visuales de Google Stitch (contexto historico, selector rapido de traduccion, explorador de libros, indicador PWA, omitiendo audio).
-- [ ] **Hito 5:** Configuracion de Supabase (tablas verses, verse_likes, verse_notes, RLS, migracion de textos libres).
-- [ ] **Hito 6:** Conexion del cliente Supabase a la UI (persistencia real de notas y likes con sesion anonima).
+- [x] **Hito 5:** Configuracion de Supabase (tablas verses, verse_likes, verse_notes, RLS, migracion de textos libres).
+- [x] **Hito 6:** Conexion del cliente Supabase a la UI (persistencia real de notas y likes con sesion anonima).
 - [ ] **Hito 7:** Configuracion de PWA (Service Worker, manifiesto, lectura offline).
