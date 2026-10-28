@@ -202,6 +202,12 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
     * Reemplazo del ciclo secuencial de versiones en `TopBar` por la apertura de este selector interactivo.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Boton de Inicio en TopBar y Reapertura Dinamica de Bienvenida (Hito 6.16 - Rama feature/welcome-modal-home-button)**:
+  * Creacion de la rama de trabajo `feature/welcome-modal-home-button`.
+  * Incorporacion del boton de inicio (`Home`) en la barra superior `TopBar`, ubicado junto a la capsula del explorador de libros con estilo compacto y armonico.
+  * Ajuste de persistencia de bienvenida: se retiro el bloqueo estricto de 24 horas por fecha fija (`biblia_welcome_dismissed_date`) para que el modal se inicialice al abrir o recargar la aplicacion y permanezca accesible bajo demanda en cualquier momento mediante el boton de inicio.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
