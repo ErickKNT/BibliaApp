@@ -189,19 +189,30 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
         {/* Pie con boton principal de inicio e invitacion sutil */}
         <div className="border-t border-black/5 dark:border-white/5 bg-[#f5f4ef] dark:bg-[#171618] px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0">
           {!isRegisteredUser && onOpenAuth ? (
-            <button
-              type="button"
-              onClick={() => {
-                onClose();
-                onOpenAuth('register');
-              }}
-              className="text-left text-[11px] text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors"
-            >
+            <div className="text-left text-[11px] text-black/60 dark:text-white/60">
               ¿Quieres respaldar tu racha?{' '}
-              <span className="font-bold underline text-black dark:text-white">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenAuth('login');
+                }}
+                className="font-bold underline text-black dark:text-white hover:opacity-80"
+              >
+                Inicia Sesión
+              </button>{' '}
+              o{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenAuth('register');
+                }}
+                className="font-bold underline text-black dark:text-white hover:opacity-80"
+              >
                 Crea una cuenta gratis
-              </span>
-            </button>
+              </button>
+            </div>
           ) : (
             <span className="text-[11px] text-black/50 dark:text-white/50 flex items-center gap-1">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />

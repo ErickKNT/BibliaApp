@@ -167,13 +167,22 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 </span>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => onOpenAuth?.('register')}
-              className="self-start sm:self-auto shrink-0 px-3.5 py-1.5 rounded-xl bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 text-xs font-bold transition-all shadow-xs"
-            >
-              Crear Cuenta
-            </button>
+            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+              <button
+                type="button"
+                onClick={() => onOpenAuth?.('login')}
+                className="px-3 py-1.5 rounded-xl border border-black/15 bg-white/70 hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10 text-black dark:text-white text-xs font-bold transition-all"
+              >
+                Iniciar Sesión
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenAuth?.('register')}
+                className="px-3.5 py-1.5 rounded-xl bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 text-xs font-bold transition-all shadow-xs"
+              >
+                Crear Cuenta
+              </button>
+            </div>
           </div>
         )}
 
