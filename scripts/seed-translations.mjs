@@ -198,3 +198,4 @@ run().catch((err) => {
   console.error('Error durante la ejecucion:', err);
   process.exit(1);
 });
+

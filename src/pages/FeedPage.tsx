@@ -177,12 +177,17 @@ export const FeedPage: React.FC = () => {
     const root = document.documentElement;
 
     const applyTheme = (isDark: boolean) => {
+      const themeColor = isDark ? '#131315' : '#f8f7f4';
       if (isDark) {
         root.classList.add('dark');
         root.classList.remove('light');
       } else {
         root.classList.add('light');
         root.classList.remove('dark');
+      }
+      const meta = document.querySelector('meta[name="theme-color"]:not([media])');
+      if (meta) {
+        meta.setAttribute('content', themeColor);
       }
     };
 

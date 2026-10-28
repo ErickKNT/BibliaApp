@@ -50,22 +50,24 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
       : 'Buenas noches';
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 animate-in fade-in select-none"
-      style={{
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)',
-        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)',
-      }}
-    >
-      {/* Velo de desenfoque de fondo */}
+    <div className="fixed inset-0 z-50 select-none animate-in fade-in">
+      {/* Velo de desenfoque a pantalla completa real */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 dark:bg-[#0e0e10]/80 backdrop-blur-md"
+        className="fixed inset-0 bg-black/60 dark:bg-black/75 backdrop-blur-sm"
       />
 
-      <section
+      {/* Contenedor flexible centrado con respeto de safe area insets */}
+      <div
+        className="relative z-10 flex h-full w-full items-center justify-center p-3 sm:p-4 pointer-events-none"
+        style={{
+          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)',
+        }}
+      >
+        <section
         aria-label="Bienvenida Diaria"
-        className="relative z-50 flex h-auto max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col rounded-2xl sm:rounded-3xl border border-black/10 dark:border-white/10 bg-[#fcfbf9] dark:bg-[#131315] text-[#18181b] dark:text-white shadow-2xl overflow-hidden min-h-0 transition-colors duration-200"
+        className="pointer-events-auto relative z-10 flex h-auto max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col rounded-2xl sm:rounded-3xl border border-black/10 dark:border-white/10 bg-[#fcfbf9] dark:bg-[#131315] text-[#18181b] dark:text-white shadow-xl overflow-hidden min-h-0 transition-colors duration-200"
       >
         {/* Cabecera con saludo contextual */}
         <div className="px-6 pt-5 pb-3 flex items-start justify-between border-b border-black/5 dark:border-white/5 shrink-0 bg-[#fcfbf9] dark:bg-[#131315]">
@@ -236,6 +238,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
           </button>
         </div>
       </section>
+      </div>
     </div>
   );
 };

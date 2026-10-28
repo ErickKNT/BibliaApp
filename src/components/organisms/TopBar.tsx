@@ -36,11 +36,11 @@ export const TopBar: React.FC<TopBarProps> = ({
   return (
     <header
       style={{
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)',
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
         paddingBottom: '8px',
       }}
       className={cn(
-        'fixed top-0 inset-x-0 z-40 bg-[#f8f7f4]/85 dark:bg-[#131315]/85 backdrop-blur-xl border-b border-black/5 dark:border-white/5 select-none transition-all duration-300 ease-out',
+        'fixed top-0 inset-x-0 z-40 bg-[#f8f7f4] dark:bg-[#131315] border-b border-black/5 dark:border-white/5 shadow-xs select-none transition-all duration-300 ease-out',
         isVisible
           ? 'translate-y-0 opacity-100 pointer-events-auto'
           : '-translate-y-full opacity-0 pointer-events-none'

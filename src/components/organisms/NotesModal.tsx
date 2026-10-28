@@ -38,17 +38,23 @@ export const NotesModal: React.FC<NotesModalProps> = ({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 select-none">
-      {/* Velo de desenfoque de fondo */}
+    <div className="fixed inset-0 z-50 select-none animate-in fade-in">
+      {/* Velo de desenfoque a pantalla completa real */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 dark:bg-[#0e0e10]/80 backdrop-blur-md transition-opacity duration-300"
+        className="fixed inset-0 bg-black/60 dark:bg-black/75 backdrop-blur-sm"
       />
 
-      {/* Drawer deslizante inferior o modal centrado en pantallas grandes */}
-      <section
+      {/* Contenedor flexible inferior o centrado */}
+      <div
+        className="relative z-10 flex h-full w-full items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none"
+        style={{
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0rem)',
+        }}
+      >
+        <section
         aria-label="Notas y Reflexiones"
-        className="relative z-50 flex h-[85dvh] sm:h-[600px] max-h-[90dvh] sm:max-h-[calc(100dvh-2.5rem)] w-full max-w-xl flex-col rounded-t-3xl sm:rounded-3xl border-t sm:border border-black/10 dark:border-white/10 bg-[#fcfbf9] dark:bg-[#1c1b1d] text-[#18181b] dark:text-white shadow-2xl overflow-hidden min-h-0 transition-colors duration-200"
+        className="pointer-events-auto relative z-10 flex h-[85dvh] sm:h-[600px] max-h-[90dvh] sm:max-h-[calc(100dvh-2.5rem)] w-full max-w-xl flex-col rounded-t-3xl sm:rounded-3xl border-t sm:border border-black/10 dark:border-white/10 bg-[#fcfbf9] dark:bg-[#1c1b1d] text-[#18181b] dark:text-white shadow-xl overflow-hidden min-h-0 transition-colors duration-200"
       >
         {/* Barra de agarre tactil */}
         <div className="flex w-full justify-center pt-3 pb-1.5 cursor-grab shrink-0">
@@ -207,6 +213,7 @@ export const NotesModal: React.FC<NotesModalProps> = ({
           </div>
         </form>
       </section>
+      </div>
     </div>
   );
 };
