@@ -12,6 +12,7 @@ import {
 export interface AuthResponse {
   user: User | null;
   error: string | null;
+  needsEmailVerification?: boolean;
 }
 
 /**
@@ -70,6 +71,9 @@ export async function signUpWithEmail(
         data: {
           display_name: displayName,
         },
+
+        emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+
       },
     });
 
@@ -77,12 +81,14 @@ export async function signUpWithEmail(
       return { user: null, error: formatAuthError(error.message) };
     }
 
-    if (data.user) {
+    const needsVerification = Boolean(data.user && !data.session);
+
+    if (data.user && data.session) {
       // Migrar datos acumulados en local hacia Supabase
       await syncLocalDataToSupabase(data.user.id, displayName);
     }
 
-    return { user: data.user, error: null };
+    return { user: data.user, error: null, needsEmailVerification: needsVerification };
   } catch (err: unknown) {
     const message = err instanceof Error ? formatAuthError(err.message) : 'Error al registrar la cuenta';
     return { user: null, error: message };
@@ -112,12 +118,14 @@ export async function signInWithEmail(email: string, pass: string): Promise<Auth
       return { user: null, error: formatAuthError(error.message) };
     }
 
-    if (data.user) {
+    const needsVerification = Boolean(data.user && !data.session);
+
+    if (data.user && data.session) {
       // Descargar perfil y racha de Supabase al almacenamiento local
       await fetchUserDataFromSupabase(data.user.id);
     }
 
-    return { user: data.user, error: null };
+    return { user: data.user, error: null, needsEmailVerification: needsVerification };
   } catch (err: unknown) {
     const message = err instanceof Error ? formatAuthError(err.message) : 'Error al iniciar sesion';
     return { user: null, error: message };
@@ -157,6 +165,37 @@ export async function sendPasswordReset(email: string): Promise<{ success: boole
     return { success: true, error: null };
   } catch (err: unknown) {
     const message = err instanceof Error ? formatAuthError(err.message) : 'Error al solicitar recuperacion';
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Reenvia el correo de confirmacion de registro.
+ */
+export async function resendConfirmationEmail(
+  email: string
+): Promise<{ success: boolean; error: string | null }> {
+  if (!isSupabaseConfigured) {
+    return { success: true, error: null };
+  }
+
+  try {
+    const redirectUrl = typeof window !== 'undefined' ? window.location.origin : undefined;
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: redirectUrl,
+      },
+    });
+
+    if (error) {
+      return { success: false, error: formatAuthError(error.message) };
+    }
+
+    return { success: true, error: null };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? formatAuthError(err.message) : 'Error al reenviar correo de confirmacion';
     return { success: false, error: message };
   }
 }

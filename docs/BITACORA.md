@@ -157,6 +157,18 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
   * Implementacion de la funcion traductora y explicativa `formatAuthError` en `src/services/authService.ts` para transformar mensajes en ingles de Supabase a orientaciones claras en espanol (incluyendo la solucion para "Email signups are disabled").
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Pantalla de Verificacion de Correo y Redireccion de Produccion (Hito 6.12 - Rama feature/email-verification-screen)**:
+  * Creacion de la rama de trabajo `feature/email-verification-screen`.
+  * Creacion de la vista dedicada `verify_email` en `AuthModal.tsx`:
+    * Ilustracion e insignia con icono `MailCheck`.
+    * Despliegue del correo electronico destinatario en caja monoespaciada de alta visibilidad.
+    * Instrucciones paso a paso para abrir el correo y pulsar el enlace de activacion.
+    * Boton de reenvio con temporizador de enfriamiento (`resendCooldown` de 60 segundos) para evitar bloqueos por tasa de envio.
+    * Botones de accion para iniciar sesion directamente o continuar leyendo de inmediato como invitado sin interrupcion.
+  * Inyeccion de `emailRedirectTo: window.location.origin` en `signUpWithEmail` y `resendConfirmationEmail` para asegurar que el enlace del correo apunte al dominio en produccion donde el usuario esta navegando.
+  * Limpieza automatica del fragmento hash de tokens (`#access_token=...`) en la barra de direcciones de `FeedPage.tsx` al retornar de la confirmacion de correo.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.

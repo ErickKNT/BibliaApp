@@ -120,6 +120,16 @@ export const FeedPage: React.FC = () => {
 
   // Escuchar y sincronizar estado de autenticacion de Supabase
   useEffect(() => {
+    // Limpiar hash de tokens de Supabase tras redireccion de confirmacion
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash;
+      if (hash.includes('access_token=') || hash.includes('type=signup') || hash.includes('type=recovery')) {
+        setTimeout(() => {
+          window.history.replaceState(null, '', window.location.pathname);
+        }, 1200);
+      }
+    }
+
     getCurrentAuthUser().then((user) => {
       setCurrentUser(user);
     });
