@@ -9,6 +9,7 @@ export interface WelcomeModalProps {
   isStreakCompletedToday: boolean;
   isRegisteredUser?: boolean;
   weeklyDays: StreakDay[];
+  currentVersion?: string;
   lastReading: {
     bookName: string;
     chapter: number;
@@ -18,13 +19,32 @@ export interface WelcomeModalProps {
   onOpenAuth?: (view: 'login' | 'register') => void;
 }
 
-// Versiculo diario inspiracional
-const DAILY_VERSE = {
-  text: 'Lámpara es a mis pies tu palabra, y lumbrera a mi camino.',
-  reference: 'Salmos 119:105',
-  version: 'RVR1960',
-  bookOrder: 19,
-  chapter: 119,
+// Versiculos diarios inspiracionales adaptados a cada traduccion
+const DAILY_VERSES: Record<string, { text: string; reference: string }> = {
+  RVR1960: {
+    text: 'Lámpara es a mis pies tu palabra, Y lumbrera a mi camino.',
+    reference: 'Salmos 119:105',
+  },
+  NVI: {
+    text: 'Tu palabra es una lámpara a mis pies; es una luz en mi sendero.',
+    reference: 'Salmo 119:105',
+  },
+  NTV: {
+    text: 'Tu palabra es una lámpara que guía mis pies y una luz para mi camino.',
+    reference: 'Salmos 119:105',
+  },
+  RVR09: {
+    text: 'Lámpara es a mis pies tu palabra, Y lumbrera a mi camino.',
+    reference: 'Salmos 119:105',
+  },
+  BL95: {
+    text: 'Tu palabra es una lámpara para mis pasos, una luz en mi sendero.',
+    reference: 'Salmo 119:105',
+  },
+  WEB: {
+    text: 'Your word is a lamp to my feet, and a light for my path.',
+    reference: 'Psalm 119:105',
+  },
 };
 
 export const WelcomeModal: React.FC<WelcomeModalProps> = ({
@@ -34,6 +54,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   isStreakCompletedToday,
   isRegisteredUser = false,
   weeklyDays,
+  currentVersion = 'RVR1960',
   lastReading,
   onClose,
   onResumeReading,
@@ -41,6 +62,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  const dailyVerse = DAILY_VERSES[currentVersion] || DAILY_VERSES['RVR1960'];
   const currentHour = new Date().getHours();
   const greeting =
     currentHour < 12
@@ -160,10 +182,10 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
               Versículo para reflexionar
             </span>
             <blockquote className="font-serif text-sm sm:text-base leading-relaxed text-black/90 dark:text-white/90">
-              “{DAILY_VERSE.text}”
+              “{dailyVerse.text}”
             </blockquote>
             <span className="text-xs font-semibold text-black/60 dark:text-white/60 block mt-2">
-              — {DAILY_VERSE.reference} ({DAILY_VERSE.version})
+              — {dailyVerse.reference} ({currentVersion})
             </span>
           </div>
 

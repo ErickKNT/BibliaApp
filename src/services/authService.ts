@@ -7,6 +7,10 @@ import {
   saveUserProfile,
   type ReadingStreakData,
   type UserProfileData,
+  getStoredPreferredVersion,
+  saveStoredPreferredVersion,
+  calculateStreakFromHistory,
+  getLocalDateString,
 } from '@/services/streakService';
 
 export interface AuthResponse {
@@ -232,7 +236,7 @@ export function onAuthStateChange(callback: (user: User | null) => void): () => 
 }
 
 /**
- * Migra los datos locales (racha, perfil) a las tablas de Supabase al registrarse o iniciar sesion.
+ * Migra los datos locales (racha, perfil, version preferida) a las tablas de Supabase al registrarse o iniciar sesion.
  */
 export async function syncLocalDataToSupabase(userId: string, customName?: string): Promise<void> {
   if (!isSupabaseConfigured) return;
@@ -240,6 +244,7 @@ export async function syncLocalDataToSupabase(userId: string, customName?: strin
   try {
     const localProfile = getUserProfile();
     const localStreak = getReadingStreakData();
+    const preferredVersion = getStoredPreferredVersion() || 'RVR1960';
 
     // 1. Sincronizar user_profiles
     const nameToSave = customName || localProfile.name || 'Lector Bíblico';
@@ -248,6 +253,7 @@ export async function syncLocalDataToSupabase(userId: string, customName?: strin
       display_name: nameToSave,
       avatar_color: localProfile.avatarColor || '#18181b',
       daily_goal: localProfile.dailyGoal || 5,
+      preferred_version: preferredVersion,
       updated_at: new Date().toISOString(),
     });
 
@@ -257,7 +263,7 @@ export async function syncLocalDataToSupabase(userId: string, customName?: strin
         user_id: userId,
         current_streak: localStreak.currentStreak || 1,
         longest_streak: localStreak.longestStreak || 1,
-        last_read_date: localStreak.lastReadDate || new Date().toISOString().split('T')[0],
+        last_read_date: localStreak.lastReadDate || getLocalDateString(),
         total_verses_read: localStreak.totalVersesRead || 1,
         history_dates: localStreak.historyDates || [],
         updated_at: new Date().toISOString(),
@@ -274,48 +280,113 @@ export async function syncLocalDataToSupabase(userId: string, customName?: strin
   }
 }
 
+export interface UserLoadedData {
+  profile: UserProfileData;
+  streak: ReadingStreakData;
+  preferredVersion: string;
+}
+
 /**
- * Descarga los datos de Supabase hacia el almacenamiento local al iniciar sesion.
+ * Descarga los datos de Supabase hacia el almacenamiento local al iniciar sesion o abrir la app.
  */
-export async function fetchUserDataFromSupabase(userId: string): Promise<void> {
-  if (!isSupabaseConfigured) return;
+export async function fetchUserDataFromSupabase(userId: string): Promise<UserLoadedData | null> {
+  if (!isSupabaseConfigured) return null;
 
   try {
-    // 1. Cargar perfil
+    // 1. Cargar perfil y version preferida
     const { data: profileData } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('id', userId)
       .maybeSingle();
 
+    let updatedProfile = getUserProfile();
+    let preferredVersion = getStoredPreferredVersion();
+
     if (profileData) {
-      const updatedProfile: UserProfileData = {
-        name: profileData.display_name,
-        avatarColor: profileData.avatar_color,
-        dailyGoal: profileData.daily_goal,
-        createdAt: profileData.created_at,
+      updatedProfile = {
+        name: profileData.display_name || updatedProfile.name,
+        avatarColor: profileData.avatar_color || updatedProfile.avatarColor,
+        dailyGoal: profileData.daily_goal || updatedProfile.dailyGoal,
+        createdAt: profileData.created_at || updatedProfile.createdAt,
       };
       saveUserProfile(updatedProfile);
+
+      if (profileData.preferred_version) {
+        preferredVersion = profileData.preferred_version;
+        saveStoredPreferredVersion(preferredVersion);
+      }
     }
 
-    // 2. Cargar racha
+    // 2. Cargar racha y recalcular continuidad matematica
     const { data: streakRow } = await supabase
       .from('user_streaks')
       .select('*')
       .eq('user_id', userId)
       .maybeSingle();
 
+    let updatedStreak = getReadingStreakData();
+
     if (streakRow) {
-      const updatedStreak: ReadingStreakData = {
-        currentStreak: streakRow.current_streak,
-        longestStreak: streakRow.longest_streak,
+      const historyDates = streakRow.history_dates || [];
+      const calculated = calculateStreakFromHistory(historyDates);
+
+      updatedStreak = {
+        currentStreak: calculated.currentStreak,
+        longestStreak: Math.max(streakRow.longest_streak || 0, calculated.longestStreak),
         lastReadDate: streakRow.last_read_date,
-        totalVersesRead: streakRow.total_verses_read,
-        historyDates: streakRow.history_dates || [],
+        totalVersesRead: streakRow.total_verses_read || 0,
+        historyDates,
       };
       saveReadingStreakData(updatedStreak);
     }
+
+    return {
+      profile: updatedProfile,
+      streak: updatedStreak,
+      preferredVersion,
+    };
   } catch (err) {
     console.warn('Error al descargar perfil y racha de Supabase:', err);
+    return null;
+  }
+}
+
+/**
+ * Actualiza la traduccion biblica preferida del usuario en Supabase.
+ */
+export async function syncPreferredVersionToSupabase(userId: string, version: string): Promise<void> {
+  if (!isSupabaseConfigured || !userId) return;
+  try {
+    saveStoredPreferredVersion(version);
+    await supabase
+      .from('user_profiles')
+      .update({
+        preferred_version: version,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId);
+  } catch (err) {
+    console.warn('Error al actualizar version preferida en Supabase:', err);
+  }
+}
+
+/**
+ * Guarda en tiempo real la racha actualizada en Supabase.
+ */
+export async function syncStreakToSupabase(userId: string, streak: ReadingStreakData): Promise<void> {
+  if (!isSupabaseConfigured || !userId) return;
+  try {
+    await supabase.from('user_streaks').upsert({
+      user_id: userId,
+      current_streak: streak.currentStreak,
+      longest_streak: streak.longestStreak,
+      last_read_date: streak.lastReadDate,
+      total_verses_read: streak.totalVersesRead,
+      history_dates: streak.historyDates,
+      updated_at: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.warn('Error al guardar racha en Supabase:', err);
   }
 }

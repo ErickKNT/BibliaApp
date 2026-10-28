@@ -27,6 +27,8 @@ import {
   getWeeklyStreakDays,
   getUserProfile,
   saveUserProfile,
+  getStoredPreferredVersion,
+  saveStoredPreferredVersion,
   getLocalDateString,
   type ReadingStreakData,
   type UserProfileData,
@@ -38,12 +40,15 @@ import {
   signOutUser,
   onAuthStateChange,
   syncLocalDataToSupabase,
+  fetchUserDataFromSupabase,
+  syncPreferredVersionToSupabase,
+  syncStreakToSupabase,
 } from '@/services/authService';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export const FeedPage: React.FC = () => {
   const [verses, setVerses] = useState<Verse[]>([]);
-  const [currentVersion, setCurrentVersion] = useState<string>('RVR1960');
+  const [currentVersion, setCurrentVersion] = useState<string>(() => getStoredPreferredVersion());
   const [activeVerseId, setActiveVerseId] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
@@ -215,14 +220,29 @@ export const FeedPage: React.FC = () => {
       }
     }
 
-    getCurrentAuthUser().then((user) => {
+    const syncUser = async (user: any) => {
       setCurrentUser(user);
+      if (user && !user.is_anonymous) {
+        const data = await fetchUserDataFromSupabase(user.id);
+        if (data) {
+          setUserProfile(data.profile);
+          setStreakData(data.streak);
+          if (data.preferredVersion) {
+            setCurrentVersion(data.preferredVersion);
+          }
+        }
+      } else {
+        setStreakData(getReadingStreakData());
+        setUserProfile(getUserProfile());
+      }
+    };
+
+    getCurrentAuthUser().then((user) => {
+      syncUser(user);
     });
 
     const unsubscribe = onAuthStateChange((user) => {
-      setCurrentUser(user);
-      setStreakData(getReadingStreakData());
-      setUserProfile(getUserProfile());
+      syncUser(user);
     });
 
     return () => {
@@ -298,6 +318,9 @@ export const FeedPage: React.FC = () => {
                 // Registrar lectura de versiculo y actualizar racha
                 const updatedStreak = recordVerseReading();
                 setStreakData(updatedStreak);
+                if (currentUser && !currentUser.is_anonymous) {
+                  syncStreakToSupabase(currentUser.id, updatedStreak);
+                }
               }
             }
           }
@@ -561,6 +584,11 @@ export const FeedPage: React.FC = () => {
   const handleSelectVersion = async (version: string) => {
     if (version === currentVersion) return;
     setCurrentVersion(version);
+    saveStoredPreferredVersion(version);
+
+    if (currentUser && !currentUser.is_anonymous) {
+      syncPreferredVersionToSupabase(currentUser.id, version);
+    }
 
     if (activeVerse) {
       setIsLoading(true);

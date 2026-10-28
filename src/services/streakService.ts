@@ -11,7 +11,7 @@ export interface ReadingStreakData {
   longestStreak: number;
   lastReadDate: string | null;
   totalVersesRead: number;
-  historyDates: string[]; // List of YYYY-MM-DD dates with reading activity
+  historyDates: string[]; // Lista de fechas 'YYYY-MM-DD' con actividad de lectura
 }
 
 export interface UserProfileData {
@@ -21,7 +21,7 @@ export interface UserProfileData {
   createdAt: string;
 }
 
-// Helper para fecha local en formato YYYY-MM-DD
+// Helper para fecha local en formato YYYY-MM-DD (inmune a desplazamientos UTC)
 export function getLocalDateString(date: Date = new Date()): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -31,6 +31,7 @@ export function getLocalDateString(date: Date = new Date()): string {
 
 const STREAK_STORAGE_KEY = 'biblia_streak_data';
 const PROFILE_STORAGE_KEY = 'biblia_user_profile';
+const VERSION_STORAGE_KEY = 'biblia_preferred_version';
 
 const DEFAULT_STREAK_DATA: ReadingStreakData = {
   currentStreak: 1,
@@ -48,21 +49,95 @@ const DEFAULT_PROFILE_DATA: UserProfileData = {
 };
 
 /**
- * Obtiene los datos de racha del almacenamiento local o inicializa.
+ * Calcula con precision matemática los dias consecutivos de racha a partir del historial.
+ * Es inmune a cambios de huso horario (DST), reinicios de sesion o formateos de fecha.
+ */
+export function calculateStreakFromHistory(
+  historyDates: string[],
+  referenceDate: Date = new Date()
+): { currentStreak: number; longestStreak: number; isCompletedToday: boolean } {
+  const historySet = new Set(historyDates || []);
+  const todayStr = getLocalDateString(referenceDate);
+
+  const yesterdayDate = new Date(referenceDate);
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterdayStr = getLocalDateString(yesterdayDate);
+
+  const isCompletedToday = historySet.has(todayStr);
+
+  let currentStreak = 0;
+  let checkDate = new Date(referenceDate);
+
+  if (!isCompletedToday) {
+    if (historySet.has(yesterdayStr)) {
+      // Si hoy no ha leido pero leyo ayer, la racha esta activa esperando la lectura de hoy
+      checkDate = yesterdayDate;
+    } else {
+      // Racha interrumpida (no leyo ni hoy ni ayer)
+      return {
+        currentStreak: 0,
+        longestStreak: computeLongestConsecutiveDays(historySet),
+        isCompletedToday: false,
+      };
+    }
+  }
+
+  // Recorrer hacia atras de dia en dia
+  while (true) {
+    const dateStr = getLocalDateString(checkDate);
+    if (historySet.has(dateStr)) {
+      currentStreak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  const longestStreak = Math.max(
+    currentStreak,
+    computeLongestConsecutiveDays(historySet)
+  );
+
+  return {
+    currentStreak,
+    longestStreak,
+    isCompletedToday,
+  };
+}
+
+function computeLongestConsecutiveDays(historySet: Set<string>): number {
+  if (historySet.size === 0) return 0;
+  const sortedDates = Array.from(historySet).sort();
+  let maxStreak = 1;
+  let currentRun = 1;
+
+  for (let i = 1; i < sortedDates.length; i++) {
+    const prev = new Date(sortedDates[i - 1] + 'T00:00:00');
+    const curr = new Date(sortedDates[i] + 'T00:00:00');
+    const diffDays = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      currentRun++;
+      if (currentRun > maxStreak) maxStreak = currentRun;
+    } else if (diffDays > 1) {
+      currentRun = 1;
+    }
+  }
+
+  return maxStreak;
+}
+
+/**
+ * Obtiene los datos de racha del almacenamiento local y recalcula la continuidad de hoy.
  */
 export function getReadingStreakData(): ReadingStreakData {
   try {
     const raw = localStorage.getItem(STREAK_STORAGE_KEY);
     if (raw) {
       const data: ReadingStreakData = JSON.parse(raw);
-      // Validar si la racha se rompio por haber pasado mas de 1 dia sin leer
-      const today = getLocalDateString();
-      const yesterday = getLocalDateString(new Date(Date.now() - 86400000));
-
-      if (data.lastReadDate && data.lastReadDate !== today && data.lastReadDate !== yesterday) {
-        // Racha interrumpida
-        data.currentStreak = 0;
-      }
+      const calculated = calculateStreakFromHistory(data.historyDates || []);
+      data.currentStreak = calculated.currentStreak;
+      data.longestStreak = Math.max(data.longestStreak || 0, calculated.longestStreak);
       return data;
     }
   } catch {
@@ -88,39 +163,17 @@ export function saveReadingStreakData(data: ReadingStreakData): void {
 export function recordVerseReading(): ReadingStreakData {
   const current = getReadingStreakData();
   const today = getLocalDateString();
-  const yesterday = getLocalDateString(new Date(Date.now() - 86400000));
 
   const historySet = new Set(current.historyDates || []);
-  const wasAlreadyCompletedToday = historySet.has(today);
-
-  // Incrementar conteo total de versiculos
-  const nextTotal = (current.totalVersesRead || 0) + 1;
-
-  if (wasAlreadyCompletedToday) {
-    // Ya habia leido hoy, solo sumamos versiculo leido
-    const updated: ReadingStreakData = {
-      ...current,
-      totalVersesRead: nextTotal,
-    };
-    saveReadingStreakData(updated);
-    return updated;
-  }
-
-  // Primer versiculo leido hoy: calcular continuidad de racha
-  let nextStreak = 1;
-  if (current.lastReadDate === yesterday) {
-    nextStreak = (current.currentStreak || 0) + 1;
-  } else if (current.lastReadDate === today) {
-    nextStreak = current.currentStreak || 1;
-  }
-
   historySet.add(today);
   const updatedHistory = Array.from(historySet);
-  const nextLongest = Math.max(current.longestStreak || 0, nextStreak);
+
+  const calculated = calculateStreakFromHistory(updatedHistory);
+  const nextTotal = (current.totalVersesRead || 0) + 1;
 
   const nextData: ReadingStreakData = {
-    currentStreak: nextStreak,
-    longestStreak: nextLongest,
+    currentStreak: calculated.currentStreak,
+    longestStreak: calculated.longestStreak,
     lastReadDate: today,
     totalVersesRead: nextTotal,
     historyDates: updatedHistory,
@@ -140,7 +193,6 @@ export function getWeeklyStreakDays(streakData: ReadingStreakData): StreakDay[] 
 
   // Calcular el lunes de la semana actual (0 es domingo, 1 es lunes)
   const currentDayOfWeek = today.getDay(); // 0..6
-  // Ajustar para que la semana comience en Lunes (0 = Lunes, 6 = Domingo)
   const distanceToMonday = (currentDayOfWeek + 6) % 7;
 
   const monday = new Date(today);
@@ -189,5 +241,24 @@ export function saveUserProfile(profile: UserProfileData): void {
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
   } catch {
     // Error al guardar
+  }
+}
+
+/**
+ * Gestion de la version preferida en almacenamiento local
+ */
+export function getStoredPreferredVersion(): string {
+  try {
+    return localStorage.getItem(VERSION_STORAGE_KEY) || 'RVR1960';
+  } catch {
+    return 'RVR1960';
+  }
+}
+
+export function saveStoredPreferredVersion(version: string): void {
+  try {
+    localStorage.setItem(VERSION_STORAGE_KEY, version);
+  } catch {
+    // Almacenamiento no disponible
   }
 }

@@ -1,8 +1,8 @@
 // Service Worker para BibliaApp
 // Version de cache
-const STATIC_CACHE_NAME = 'biblia-static-v3';
-const DYNAMIC_CACHE_NAME = 'biblia-dynamic-v3';
-const API_CACHE_NAME = 'biblia-api-verses-v3';
+const STATIC_CACHE_NAME = 'biblia-static-v4';
+const DYNAMIC_CACHE_NAME = 'biblia-dynamic-v4';
+const API_CACHE_NAME = 'biblia-api-verses-v4';
 
 // Recursos criticos para lectura offline inmediata
 const PRECACHE_ASSETS = [
