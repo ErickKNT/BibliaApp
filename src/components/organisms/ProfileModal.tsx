@@ -686,10 +686,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 </span>
                 <div className="space-y-2">
                   {[
-                    { id: 'RVR1960', name: 'Reina-Valera 1960 (66 libros completos en Supabase)' },
-                    { id: 'RVR09', name: 'Reina-Valera 1909 (Dominio Público)' },
-                    { id: 'WEB', name: 'World English Bible (Public Domain)' },
-                    { id: 'BL95', name: 'Biblia Abierta / Libre' },
+                    { id: 'RVR1960', name: 'Reina-Valera 1960', copyright: '© Sociedades Bíblicas Unidas' },
+                    { id: 'NVI', name: 'Nueva Versión Internacional', copyright: '© 1999, 2015 Bíblica, Inc.' },
+                    { id: 'NTV', name: 'Nueva Traducción Viviente', copyright: '© 2010 Tyndale House Publishers' },
+                    { id: 'RVR09', name: 'Reina-Valera 1909', copyright: 'Dominio Público' },
+                    { id: 'BL95', name: 'Biblia Latinoamericana', copyright: 'Edición Pastoral' },
+                    { id: 'WEB', name: 'World English Bible', copyright: 'Public Domain' },
                   ].map((ver) => (
                     <button
                       key={ver.id}
@@ -702,18 +704,44 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       }`}
                     >
                       <div>
-                        <span className="text-xs sm:text-sm font-bold text-black dark:text-white block">
-                          {ver.id}
-                        </span>
-                        <span className="text-[11px] sm:text-xs text-black/50 dark:text-white/50">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs sm:text-sm font-bold text-black dark:text-white">
+                            {ver.id}
+                          </span>
+                          <span className="text-[10px] text-black/40 dark:text-white/40">
+                            {ver.copyright}
+                          </span>
+                        </div>
+                        <span className="text-[11px] sm:text-xs text-black/50 dark:text-white/50 block">
                           {ver.name}
                         </span>
                       </div>
                       {currentVersion === ver.id && (
-                        <Check className="h-4 w-4 text-black dark:text-white" />
+                        <Check className="h-4 w-4 text-black dark:text-white shrink-0 ml-2" />
                       )}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Informacion Legal y Creditos Editoriales */}
+              <div className="pt-2">
+                <span className="text-xs font-semibold text-black/70 dark:text-white/70 block mb-2">
+                  Créditos y Derechos de Autor
+                </span>
+                <div className="p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 space-y-2 text-[10px] text-black/60 dark:text-white/60 leading-relaxed">
+                  <div>
+                    <strong className="text-black/80 dark:text-white/80 block font-semibold">Nueva Versión Internacional (NVI)</strong>
+                    Santa Biblia, NUEVA VERSIÓN INTERNACIONAL NVI © 1999, 2015 por Bíblica, Inc. Todos los derechos reservados mundialmente. Usado con permiso.
+                  </div>
+                  <div>
+                    <strong className="text-black/80 dark:text-white/80 block font-semibold">Nueva Traducción Viviente (NTV)</strong>
+                    Santa Biblia, Nueva Traducción Viviente, © Tyndale House Foundation, 2010. Todos los derechos reservados. Usado con permiso de Tyndale House Publishers.
+                  </div>
+                  <div>
+                    <strong className="text-black/80 dark:text-white/80 block font-semibold">Reina-Valera 1960 (RVR1960)</strong>
+                    Santa Biblia, Versión Reina-Valera © 1960 Sociedades Bíblicas Unidas. Todos los derechos reservados.
+                  </div>
                 </div>
               </div>
             </div>

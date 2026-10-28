@@ -1,11 +1,12 @@
-import React from 'react';
-import { X, BookOpen, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, BookOpen, Check, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
 
 export interface BibleVersionOption {
   id: string;
   name: string;
   description: string;
   badge: string;
+  copyright: string;
 }
 
 export const AVAILABLE_VERSIONS: BibleVersionOption[] = [
@@ -14,24 +15,42 @@ export const AVAILABLE_VERSIONS: BibleVersionOption[] = [
     name: 'Reina-Valera 1960',
     description: 'La versión clásica y más extendida en la comunidad hispanohablante.',
     badge: 'Recomendada',
+    copyright: '© Sociedades Bíblicas Unidas',
+  },
+  {
+    id: 'NVI',
+    name: 'Nueva Versión Internacional',
+    description: 'Lenguaje contemporáneo, fluido y de alta fidelidad teológica.',
+    badge: 'Popular',
+    copyright: '© 1999, 2015 Bíblica, Inc.',
+  },
+  {
+    id: 'NTV',
+    name: 'Nueva Traducción Viviente',
+    description: 'Traducción dinámica con extraordinaria claridad y calidez devocional.',
+    badge: 'Devocional',
+    copyright: '© 2010 Tyndale House Foundation',
   },
   {
     id: 'RVR09',
     name: 'Reina-Valera 1909',
     description: 'Traducción histórica con léxico solemne y tradicional.',
     badge: 'Dominio Público',
+    copyright: 'Dominio Público',
   },
   {
     id: 'BL95',
     name: 'Biblia Latinoamericana',
     description: 'Traducción pastoral con vocabulario accesible y cercano.',
     badge: 'Pastoral',
+    copyright: 'Edición Pastoral',
   },
   {
     id: 'WEB',
     name: 'World English Bible',
     description: 'Traducción contemporánea en inglés de dominio público.',
     badge: 'Inglés',
+    copyright: 'Public Domain',
   },
 ];
 
@@ -48,6 +67,8 @@ export const VersionSelectorModal: React.FC<VersionSelectorModalProps> = ({
   onClose,
   onSelectVersion,
 }) => {
+  const [showLegalCredits, setShowLegalCredits] = useState(false);
+
   if (!isOpen) return null;
 
   return (
@@ -111,7 +132,7 @@ export const VersionSelectorModal: React.FC<VersionSelectorModalProps> = ({
                 }`}
               >
                 <div className="space-y-1 pr-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs sm:text-sm font-bold tracking-tight">
                       {ver.name}
                     </span>
@@ -134,6 +155,15 @@ export const VersionSelectorModal: React.FC<VersionSelectorModalProps> = ({
                   >
                     {ver.description}
                   </p>
+                  <div
+                    className={`text-[10px] font-medium pt-0.5 ${
+                      isSelected
+                        ? 'text-white/70 dark:text-black/70'
+                        : 'text-black/40 dark:text-white/40'
+                    }`}
+                  >
+                    {ver.copyright}
+                  </div>
                 </div>
 
                 <div
@@ -148,6 +178,42 @@ export const VersionSelectorModal: React.FC<VersionSelectorModalProps> = ({
               </button>
             );
           })}
+
+          {/* Seccion de Creditos y Derechos Editoriales */}
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={() => setShowLegalCredits((prev) => !prev)}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 text-[11px] font-semibold text-black/70 dark:text-white/70 transition-colors"
+            >
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-black/50 dark:text-white/50" />
+                <span>Créditos de traducción y derechos de autor</span>
+              </div>
+              {showLegalCredits ? (
+                <ChevronUp className="h-3.5 w-3.5 text-black/50 dark:text-white/50" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5 text-black/50 dark:text-white/50" />
+              )}
+            </button>
+
+            {showLegalCredits && (
+              <div className="mt-2 p-3 rounded-xl bg-black/[0.03] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 space-y-2 text-[10px] text-black/60 dark:text-white/60 leading-relaxed">
+                <div>
+                  <strong className="text-black/80 dark:text-white/80 block">Nueva Versión Internacional (NVI)</strong>
+                  Santa Biblia, NUEVA VERSIÓN INTERNACIONAL NVI © 1999, 2015 por Bíblica, Inc. Todos los derechos reservados mundialmente. Usado con permiso.
+                </div>
+                <div>
+                  <strong className="text-black/80 dark:text-white/80 block">Nueva Traducción Viviente (NTV)</strong>
+                  Santa Biblia, Nueva Traducción Viviente, © Tyndale House Foundation, 2010. Todos los derechos reservados. Usado con permiso de Tyndale House Publishers.
+                </div>
+                <div>
+                  <strong className="text-black/80 dark:text-white/80 block">Reina-Valera 1960 (RVR1960)</strong>
+                  Santa Biblia, Versión Reina-Valera © 1960 Sociedades Bíblicas Unidas. Todos los derechos reservados.
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Pie informativo */}

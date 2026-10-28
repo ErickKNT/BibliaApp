@@ -548,7 +548,7 @@ export const FeedPage: React.FC = () => {
   };
 
   const handleVersionCycle = () => {
-    const versions = ['RVR1960', 'RVR09', 'WEB', 'BL95'];
+    const versions = ['RVR1960', 'NVI', 'NTV', 'RVR09', 'BL95', 'WEB'];
     const nextIndex = (versions.indexOf(currentVersion) + 1) % versions.length;
     handleSelectVersion(versions[nextIndex]);
   };
