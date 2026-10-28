@@ -30,7 +30,7 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
     <aside
       aria-label="Acciones del versiculo"
       className={cn(
-        'fixed bottom-28 right-4 sm:right-8 z-30 flex flex-col items-center gap-4 select-none pointer-events-auto',
+        'fixed bottom-20 sm:bottom-24 right-3 sm:right-6 z-30 flex flex-col items-center gap-2.5 sm:gap-3.5 select-none pointer-events-auto',
         className
       )}
     >
@@ -43,7 +43,7 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
       >
         <Heart
           className={cn(
-            'h-6 w-6 transition-transform group-active:scale-125',
+            'h-4.5 w-4.5 sm:h-5 sm:w-5 transition-transform group-active:scale-125',
             isLiked ? 'fill-current stroke-current' : 'stroke-current'
           )}
         />
@@ -55,7 +55,7 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
         label="Notas"
         badge={notesCount > 0 ? notesCount : undefined}
       >
-        <FileText className="h-6 w-6 stroke-current" />
+        <FileText className="h-4.5 w-4.5 sm:h-5 sm:w-5 stroke-current" />
       </IconButton>
 
       {/* Guardar / Marcador */}
@@ -66,7 +66,7 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
       >
         <Bookmark
           className={cn(
-            'h-6 w-6',
+            'h-4.5 w-4.5 sm:h-5 sm:w-5',
             isBookmarked ? 'fill-current stroke-current' : 'stroke-current'
           )}
         />
@@ -77,7 +77,7 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
         onClick={onShare}
         label="Card"
       >
-        <Share2 className="h-6 w-6 stroke-current" />
+        <Share2 className="h-4.5 w-4.5 sm:h-5 sm:w-5 stroke-current" />
       </IconButton>
     </aside>
   );

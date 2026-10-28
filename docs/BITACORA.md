@@ -176,6 +176,20 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
   * Mantenimiento de la ubicacion de "Cerrar Sesion" en la seccion de Ajustes segun directiva del usuario.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Refinamiento de Escala y Proporciones para Pantallas Moviles (Hito 6.14 - Rama feature/mobile-ui-scaling-refinement)**:
+  * Creacion de la rama de trabajo `feature/mobile-ui-scaling-refinement`.
+  * Reduccion y estilizacion del riel flotante de acciones:
+    * Botones `IconButton` ajustados de 48px a 40px en movil (con icono de 18-20px y texto `text-[9px]`/`text-[10px]`), logrando una estetica no invasiva y de mayor confort visual.
+    * Reduccion del espaciado vertical entre botones de `gap-4` a `gap-2.5 sm:gap-3.5`.
+  * Compactacion de la barra superior `TopBar`:
+    * Altura reducida de 64px a 52px en movil (`h-13 sm:h-15`).
+    * Botones de tema, traduccion y perfil compactados a 32px (`h-8 w-8`) y capsula de exploracion de libros mas esbelta.
+  * Ajuste proporcional de metadatos en `VerseCard`:
+    * Conservacion de la tipografia amplia y editorial del versiculo biblico.
+    * Reduccion de las insignias de capitulo, version y contexto historico (`text-[10px] sm:text-xs` y padding optimizado).
+    * Ajuste sutil del indicador inferior de desplazamiento.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
