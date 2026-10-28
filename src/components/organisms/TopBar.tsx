@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, User, Library, ChevronDown, Sun, Moon } from 'lucide-react';
+import { BookOpen, User, Library, ChevronDown, Sun, Moon, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface TopBarProps {
@@ -11,6 +11,7 @@ export interface TopBarProps {
   onToggleTheme?: () => void;
   onOpenExplorer?: () => void;
   onOpenProfile?: () => void;
+  onOpenWelcome?: () => void;
   onVersionSelect?: () => void;
   onOpenVersionSelector?: () => void;
 }
@@ -24,6 +25,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   onToggleTheme,
   onOpenExplorer,
   onOpenProfile,
+  onOpenWelcome,
   onVersionSelect,
   onOpenVersionSelector,
 }) => {
@@ -39,8 +41,20 @@ export const TopBar: React.FC<TopBarProps> = ({
       )}
     >
       <div className="h-full px-3 sm:px-6 flex items-center justify-between">
-        {/* Identidad de la aplicacion y acceso al explorador de libros */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Identidad de la aplicacion, boton de inicio y acceso al explorador de libros */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
+          {/* Boton de inicio y racha diaria */}
+          <button
+            type="button"
+            onClick={onOpenWelcome}
+            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full bg-[#edece6] hover:bg-[#e4e2db] dark:bg-[#201f22] dark:hover:bg-[#2a2a2c] border border-black/5 dark:border-white/10 flex items-center justify-center text-black/80 dark:text-white transition-all active:scale-95 shadow-xs"
+            title="Inicio y Racha de Lectura"
+            aria-label="Abrir inicio y racha"
+          >
+            <Home className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          </button>
+
+          {/* Acceso al explorador de libros */}
           <button
             type="button"
             onClick={onOpenExplorer}

@@ -51,15 +51,8 @@ export const FeedPage: React.FC = () => {
   const [streakData, setStreakData] = useState<ReadingStreakData>(() => getReadingStreakData());
   const [userProfile, setUserProfile] = useState<UserProfileData>(() => getUserProfile());
 
-  // Pantalla de bienvenida diaria
-  const [isWelcomeOpen, setIsWelcomeOpen] = useState<boolean>(() => {
-    try {
-      const dismissed = localStorage.getItem('biblia_welcome_dismissed_date');
-      return dismissed !== getLocalDateString();
-    } catch {
-      return false;
-    }
-  });
+  // Pantalla de bienvenida (visible al cargar/recargar y reaperturable con boton de inicio)
+  const [isWelcomeOpen, setIsWelcomeOpen] = useState<boolean>(true);
 
   // Tema de apariencia (Modo Claro / Modo Oscuro / Sistema)
   const [theme, setTheme] = useState<'dark' | 'light' | 'system'>(() => {
@@ -390,14 +383,9 @@ export const FeedPage: React.FC = () => {
     setStreakData(getReadingStreakData());
   };
 
-  // Cierre de bienvenida diaria
+  // Cierre de bienvenida
   const handleCloseWelcome = () => {
     setIsWelcomeOpen(false);
-    try {
-      localStorage.setItem('biblia_welcome_dismissed_date', getLocalDateString());
-    } catch {
-      // Ignorar error de guardado
-    }
   };
 
   // Navegacion directa desde el Explorador de Libros
@@ -595,6 +583,7 @@ export const FeedPage: React.FC = () => {
         isVisible={isHudVisible}
         onToggleTheme={handleToggleTheme}
         onOpenExplorer={() => setIsExplorerOpen(true)}
+        onOpenWelcome={() => setIsWelcomeOpen(true)}
         onOpenProfile={() => setIsProfileOpen(true)}
         onOpenVersionSelector={() => setIsVersionSelectorOpen(true)}
         onVersionSelect={handleVersionCycle}
