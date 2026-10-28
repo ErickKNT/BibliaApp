@@ -249,6 +249,15 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
     * En todos los modales (`ProfileModal`, `BookExplorerModal`, `WelcomeModal`, `VersionSelectorModal`, `AuthModal`, `NotesModal`), se protegen las cabeceras y botones de cierre con cotas de safe area.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Refinamiento de Holgura y Despeje Ergonómico en iOS TopBar (Hito 7.2 - Rama feature/topbar-ios-clearance-refinement)**:
+  * Creacion de la rama de trabajo `feature/topbar-ios-clearance-refinement`.
+  * Correccion del solapamiento visual residual y holgura tactil en iPhone:
+    * Se agrego un margen superior de 16px adicional sobre el Safe Area Inset (`paddingTop: calc(env(safe-area-inset-top, 0px) + 16px)`) y 8px de margen inferior en `<header>`, garantizando una separacion de mas de 35px respecto al reloj y porcentaje de bateria de iOS.
+    * Altura de la barra de acciones ajustada a `h-10 sm:h-12` (40px/48px) para mantener los botones (Home, Explorador, Tema, Traduccion y Perfil) con excelente ergonomia y libre acceso tactil.
+    * Se actualizo el espaciado superior en `VerseCard.tsx` (`paddingTop: calc(env(safe-area-inset-top, 0px) + 5.25rem)`) para mantener una distancia visual equilibrada del versiculo respecto a la barra superior.
+    * Actualizacion de version de cache en `sw.js` a `v2` para forzar la actualizacion inmediata en dispositivos con la PWA instalada.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.

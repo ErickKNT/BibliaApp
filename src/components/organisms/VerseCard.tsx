@@ -64,8 +64,8 @@ export const VerseCard: React.FC<VerseCardProps> = ({
       data-verse-id={verse.id}
       onClick={handleTap}
       style={{
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 3.75rem)',
-        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.25rem)',
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 5.25rem)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
       }}
       className="verse-snap-card relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden bg-[#f8f7f4] dark:bg-[#131315] px-5 sm:px-12 snap-start select-none transition-colors duration-200 cursor-pointer"
     >
