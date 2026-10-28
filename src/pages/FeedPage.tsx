@@ -31,7 +31,8 @@ import {
   type ReadingStreakData,
   type UserProfileData,
 } from '@/services/streakService';
-import { Loader2 } from 'lucide-react';
+import { Loader2, WifiOff } from 'lucide-react';
+import { onNetworkStatusChange } from '@/services/pwaService';
 import {
   getCurrentAuthUser,
   signOutUser,
@@ -83,6 +84,17 @@ export const FeedPage: React.FC = () => {
 
   // Estado de usuario en Supabase (invitado o registrado)
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
+
+  // Estado de conectividad de red PWA (offline / online)
+  const [isOffline, setIsOffline] = useState<boolean>(() => {
+    return typeof navigator !== 'undefined' ? !navigator.onLine : false;
+  });
+
+  useEffect(() => {
+    return onNetworkStatusChange((online) => {
+      setIsOffline(!online);
+    });
+  }, []);
 
   // Modo Lectura Inmersiva Total (Auto-Hide HUD)
   const [isHudVisible, setIsHudVisible] = useState<boolean>(true);
@@ -600,6 +612,7 @@ export const FeedPage: React.FC = () => {
         activeChapter={activeVerse?.chapter || lastReading.chapter}
         theme={theme}
         isVisible={isHudVisible}
+        isOffline={isOffline}
         onToggleTheme={handleToggleTheme}
         onOpenExplorer={() => setIsExplorerOpen(true)}
         onOpenWelcome={() => setIsWelcomeOpen(true)}
@@ -629,6 +642,16 @@ export const FeedPage: React.FC = () => {
           onOpenNotes={() => handleOpenNotes(activeVerse.id)}
           onShare={() => handleShare(activeVerse)}
         />
+      )}
+
+      {/* Indicador flotante no intrusivo de lectura offline */}
+      {isOffline && (
+        <div className="fixed top-14 sm:top-16 inset-x-0 z-30 flex justify-center pointer-events-none px-4">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 dark:bg-amber-400/15 text-amber-800 dark:text-amber-200 border border-amber-500/30 text-xs font-semibold backdrop-blur-md shadow-md animate-in fade-in slide-in-from-top-2 duration-300">
+            <WifiOff className="h-3.5 w-3.5 shrink-0" />
+            <span>Modo sin conexión · Lectura local activa</span>
+          </div>
+        </div>
       )}
 
       {/* Indicador de carga cuando se cambia de capitulo o libro */}

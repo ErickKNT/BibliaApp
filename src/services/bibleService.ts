@@ -119,6 +119,30 @@ function createOfflineFallbackVerses(bookOrder: number, chapter: number, version
   ];
 }
 
+function getLocalCachedVerses(key: string): Verse[] | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch {
+    // Almacenamiento no disponible
+  }
+  return null;
+}
+
+function setLocalCachedVerses(key: string, verses: Verse[]): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(verses));
+  } catch {
+    // Cuota de almacenamiento excedida
+  }
+}
+
+
 /**
  * Obtiene los versiculos iniciales para el feed vertical.
  */
@@ -126,6 +150,8 @@ export async function getFeedVerses(version: string = 'RVR1960', limit: number =
   if (!isSupabaseConfigured) {
     return FALLBACK_VERSES.map((v) => ({ ...v, version }));
   }
+
+  const cacheKey = 'biblia_cached_feed_' + version;
 
   try {
     const { data, error } = await supabase
@@ -147,15 +173,23 @@ export async function getFeedVerses(version: string = 'RVR1960', limit: number =
           .limit(limit);
 
         if (fallbackData && fallbackData.length > 0) {
-          return fallbackData.map(mapVerseRow);
+          const fallbackVerses = fallbackData.map(mapVerseRow);
+          setLocalCachedVerses(cacheKey, fallbackVerses);
+          return fallbackVerses;
         }
       }
+      const localCached = getLocalCachedVerses(cacheKey);
+      if (localCached) return localCached;
       return FALLBACK_VERSES.map((v) => ({ ...v, version }));
     }
 
-    return data.map(mapVerseRow);
+    const mapped = data.map(mapVerseRow);
+    setLocalCachedVerses(cacheKey, mapped);
+    return mapped;
   } catch (err) {
     console.error('Error al consultar versiculos en Supabase:', err);
+    const localCached = getLocalCachedVerses(cacheKey);
+    if (localCached) return localCached;
     return FALLBACK_VERSES.map((v) => ({ ...v, version }));
   }
 }
@@ -169,7 +203,11 @@ export async function getVersesByBookAndChapter(
   version: string = 'RVR1960',
   limit: number = 40
 ): Promise<Verse[]> {
+  const cacheKey = 'biblia_cached_chap_' + version + '_' + bookOrder + '_' + chapter;
+
   if (!isSupabaseConfigured) {
+    const cached = getLocalCachedVerses(cacheKey);
+    if (cached) return cached;
     return createOfflineFallbackVerses(bookOrder, chapter, version);
   }
 
@@ -204,12 +242,18 @@ export async function getVersesByBookAndChapter(
       .limit(limit);
 
     if (error || !data || data.length === 0) {
+      const cached = getLocalCachedVerses(cacheKey);
+      if (cached) return cached;
       return createOfflineFallbackVerses(bookOrder, chapter, version);
     }
 
-    return data.map(mapVerseRow);
+    const mapped = data.map(mapVerseRow);
+    setLocalCachedVerses(cacheKey, mapped);
+    return mapped;
   } catch (err) {
     console.error('Error al cargar versiculos por libro y capitulo:', err);
+    const cached = getLocalCachedVerses(cacheKey);
+    if (cached) return cached;
     return createOfflineFallbackVerses(bookOrder, chapter, version);
   }
 }

@@ -217,6 +217,28 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
     * Toque simple de pantalla: conmutacion manual del HUD para mayor flexibilidad del lector.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Implementacion Completa de Modo PWA y Lectura Offline (Hito 7 - Rama feature/pwa-implementation)**:
+  * Creacion de la rama de trabajo `feature/pwa-implementation`.
+  * Manifiesto Web PWA (`public/manifest.webmanifest`):
+    * Configuracion de `name`, `short_name`, `theme_color`, `background_color`, modo `standalone` y orientacion `portrait-primary`.
+    * Generacion de iconos en alta resolucion: vector escalable SVG (`icon.svg`), iconos estandar PNG (192x192 y 512x512), iconos adaptativos maskable (192x192 y 512x512) y `apple-touch-icon.png` (180x180).
+  * Service Worker Nativo de Alto Rendimiento (`public/sw.js`):
+    * Precache inicial del cascaron de la aplicacion (App Shell: HTML, JS, CSS, iconos y fuentes).
+    * Estrategia Network-First con respaldo en Cache para navegacion principal, permitiendo cargar la aplicacion en modo avion o sin internet.
+    * Estrategia Stale-While-Revalidate para recursos estaticos y fuentes de Google Fonts.
+    * Cache dedicado para peticiones REST de Supabase (`/rest/v1/verses*`), garantizando que versiculos y capitulos consultados esten disponibles de inmediato sin conexion.
+  * Capa de Cache Local de Escrituras (`src/services/bibleService.ts`):
+    * Persistencia de versiculos consultados en almacenamiento local (`biblia_cached_feed_*` y `biblia_cached_chap_*`).
+    * Recuperacion transparente de capitulos locales ante desconexion o falta de datos en Supabase.
+  * Servicio y Ciclo de Vida PWA (`src/services/pwaService.ts`):
+    * Registro automatico de Service Worker y gestion de actualizaciones.
+    * Captura del evento `beforeinstallprompt` y estado de instalacion (`isAppInstalled`).
+    * Deteccion y notificacion de estado de red (online / offline).
+  * Experiencia de Usuario PWA:
+    * Seccion de instalacion PWA y estado de conexion en la pestaña de Ajustes de `ProfileModal.tsx`, con boton nativo de instalacion e instrucciones para iOS / Safari.
+    * Indicador no intrusivo de conexion en `TopBar.tsx` y aviso flotante de modo sin conexion en `FeedPage.tsx`.
+    * Actualizacion de encabezados HTTP en `vercel.json` (`Cache-Control: public, max-age=0, must-revalidate` para `sw.js`).
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
@@ -234,6 +256,7 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 * **ADR-014 (Motor de Racha Diaria con Calendario Semanal y Deteccion de Continuidad):** El registro de racha computa fechas locales consecutivas y actualiza en tiempo real el progreso de 7 dias, recompensando la constancia diaria sin bloqueos de conexion y persistiendo de forma progresiva.
 * **ADR-015 (Bienvenida Contextual Diaria no Intrusiva):** Despliegue de bienvenida una sola vez por jornada natural con versiculo inspiracional y estado de meta, facilitando la transicion directa al feed de lectura sin friccion.
 * **ADR-016 (Perfil Progresivo y Sincronizacion de Racha en la Nube con Supabase Auth):** El acceso y lectura de toda la Biblia permanece 100% abierto sin forzar registro previo. Los datos de lectura y racha se generan de inmediato de forma local; cuando el lector decide registrarse o iniciar sesion, una migracion silenciosa y transparente traslada todo su historial acumulado hacia Supabase (tablas `user_profiles` y `user_streaks`), permitiendo persistencia multi-dispositivo sin friccion de entrada.
+* **ADR-017 (Arquitectura PWA Hibrida y Resiliencia Offline sin Dependencias Pesadas):** Se opto por un Service Worker nativo puro junto a una doble capa de persistencia (CacheStorage para el App Shell y peticiones de red, y LocalStorage estructurado para versiculos y lecturas). Esta arquitectura garantiza arranque instantaneo offline y compatibilidad total con Lighthouse, Chrome, Edge y Safari iOS sin agregar dependencias pesadas de terceros.
 
 ---
 
@@ -246,4 +269,4 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 - [x] **Hito 4:** Evaluacion y fusion de componentes visuales de Google Stitch (contexto historico, selector rapido de traduccion, explorador de libros, indicador PWA, omitiendo audio).
 - [x] **Hito 5:** Configuracion de Supabase (tablas verses, verse_likes, verse_notes, RLS, migracion y siembra completa de los 66 libros).
 - [x] **Hito 6:** Conexion del cliente Supabase a la UI (persistencia real de notas y likes con sesion anonima).
-- [ ] **Hito 7:** Configuracion de PWA (Service Worker, manifiesto, lectura offline).
+- [x] **Hito 7:** Configuracion de PWA (Service Worker, manifiesto, lectura offline).

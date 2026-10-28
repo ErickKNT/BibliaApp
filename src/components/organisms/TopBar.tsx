@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, User, Library, ChevronDown, Sun, Moon, Home } from 'lucide-react';
+import { BookOpen, User, Library, ChevronDown, Sun, Moon, Home, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface TopBarProps {
@@ -8,6 +8,7 @@ export interface TopBarProps {
   activeChapter?: number;
   theme?: 'dark' | 'light' | 'system';
   isVisible?: boolean;
+  isOffline?: boolean;
   onToggleTheme?: () => void;
   onOpenExplorer?: () => void;
   onOpenProfile?: () => void;
@@ -22,6 +23,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   activeChapter,
   theme = 'dark',
   isVisible = true,
+  isOffline = false,
   onToggleTheme,
   onOpenExplorer,
   onOpenProfile,
@@ -71,6 +73,14 @@ export const TopBar: React.FC<TopBarProps> = ({
             </div>
           </button>
         </div>
+
+        {/* Indicador de estado offline cuando no hay conexion */}
+        {isOffline && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 dark:bg-amber-400/15 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-[10px] sm:text-xs font-semibold animate-pulse">
+            <WifiOff className="h-3 w-3" />
+            <span className="hidden xs:inline">Modo sin conexión</span>
+          </div>
+        )}
 
         {/* Acciones derechas: alternador de tema, selector de version y perfil */}
         <div className="flex items-center gap-1.5 sm:gap-2">

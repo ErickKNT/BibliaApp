@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { isAppInstalled, promptPwaInstall, onInstallAvailabilityChange, onNetworkStatusChange } from '@/services/pwaService';
+import React, { useState, useEffect } from 'react';
 import type { Verse, VerseNote } from '@/types/bible';
 import type { ReadingStreakData, StreakDay, UserProfileData } from '@/services/streakService';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -22,6 +23,10 @@ import {
   Sparkles,
   LogOut,
   LogIn,
+  Smartphone,
+  Download,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 
 export interface ProfileModalProps {
@@ -70,6 +75,33 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   const [activeTab, setActiveTab] = useState<'racha' | 'guardados' | 'notas' | 'ajustes'>('racha');
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(userProfile.name);
+
+  // Estado de instalacion PWA y conectividad
+  const [canInstall, setCanInstall] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const [isInstalling, setIsInstalling] = useState(false);
+  const [installSuccess, setInstallSuccess] = useState(false);
+
+  useEffect(() => {
+    setIsInstalled(isAppInstalled());
+    const unsubInstall = onInstallAvailabilityChange(setCanInstall);
+    const unsubNetwork = onNetworkStatusChange(setIsOnline);
+    return () => {
+      unsubInstall();
+      unsubNetwork();
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    setIsInstalling(true);
+    const result = await promptPwaInstall();
+    setIsInstalling(false);
+    if (result === 'accepted') {
+      setInstallSuccess(true);
+      setIsInstalled(true);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -586,6 +618,59 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     </button>
                   ))}
                 </div>
+              </div>
+              {/* Modo PWA y Lectura Offline */}
+              <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-[#edece6] dark:bg-[#201f22] p-4 text-left">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Smartphone className="h-4 w-4 text-black dark:text-white" />
+                    <span className="text-xs sm:text-sm font-bold text-black dark:text-white">
+                      Aplicación Web Progresiva (PWA)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-black/5 dark:bg-white/10 text-black/70 dark:text-white/70">
+                    {isOnline ? (
+                      <>
+                        <Wifi className="h-3 w-3 text-emerald-500" />
+                        <span>En línea</span>
+                      </>
+                    ) : (
+                      <>
+                        <WifiOff className="h-3 w-3 text-amber-500" />
+                        <span>Sin conexión</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-[11px] sm:text-xs text-black/60 dark:text-white/60 leading-relaxed mb-3">
+                  Instala BibliaApp en tu dispositivo para lectura inmersiva a pantalla completa y acceso continuo sin necesidad de internet.
+                </p>
+
+                {isInstalled || installSuccess ? (
+                  <div className="flex items-center gap-2 p-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 text-xs font-medium text-black/80 dark:text-white/80">
+                    <CheckCircle2 className="h-4 w-4 text-black dark:text-white shrink-0" />
+                    <span>Aplicación instalada. El modo offline y la caché local están activos.</span>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {canInstall && (
+                      <button
+                        type="button"
+                        onClick={handleInstallClick}
+                        disabled={isInstalling}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 transition-all shadow-xs cursor-pointer"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        <span>{isInstalling ? 'Instalando...' : 'Instalar en este Dispositivo'}</span>
+                      </button>
+                    )}
+                    <div className="p-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 text-[10px] sm:text-[11px] text-black/50 dark:text-white/50 leading-normal">
+                      <span className="font-semibold text-black/70 dark:text-white/70">En iPhone o iPad: </span>
+                      pulsa el botón <span className="underline">Compartir</span> en Safari y selecciona <span className="font-semibold text-black/70 dark:text-white/70">"Añadir a pantalla de inicio"</span>.
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Selector de version preferida */}
