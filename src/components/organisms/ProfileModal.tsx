@@ -117,7 +117,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   const userInitial = (userProfile.name.trim()[0] || 'L').toUpperCase();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 animate-in fade-in select-none">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 animate-in fade-in select-none"
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)',
+      }}
+    >
       <div
         onClick={onClose}
         className="fixed inset-0 bg-black/60 dark:bg-[#0e0e10]/80 backdrop-blur-md"

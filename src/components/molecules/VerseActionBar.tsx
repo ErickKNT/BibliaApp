@@ -31,8 +31,11 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
   return (
     <aside
       aria-label="Acciones del versiculo"
+      style={{
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 4.5rem)',
+      }}
       className={cn(
-        'fixed bottom-20 sm:bottom-24 right-3 sm:right-6 z-30 flex flex-col items-center gap-2.5 sm:gap-3.5 select-none transition-all duration-300 ease-out pointer-events-auto',
+        'fixed right-3 sm:right-6 z-30 flex flex-col items-center gap-2.5 sm:gap-3.5 select-none transition-all duration-300 ease-out pointer-events-auto',
         isVisible
           ? 'translate-x-0 opacity-100'
           : 'translate-x-12 opacity-0 pointer-events-none',

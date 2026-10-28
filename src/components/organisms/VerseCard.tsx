@@ -63,7 +63,11 @@ export const VerseCard: React.FC<VerseCardProps> = ({
     <article
       data-verse-id={verse.id}
       onClick={handleTap}
-      className="verse-snap-card relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden bg-[#f8f7f4] dark:bg-[#131315] px-5 sm:px-12 pt-16 sm:pt-20 pb-6 sm:pb-8 snap-start select-none transition-colors duration-200 cursor-pointer"
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 3.75rem)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.25rem)',
+      }}
+      className="verse-snap-card relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden bg-[#f8f7f4] dark:bg-[#131315] px-5 sm:px-12 snap-start select-none transition-colors duration-200 cursor-pointer"
     >
       {/* Resplandor ambiental de profundidad segun tema */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center">

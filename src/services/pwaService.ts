@@ -135,3 +135,4 @@ export async function promptPwaInstall(): Promise<'accepted' | 'dismissed' | 'un
     return 'unavailable';
   }
 }
+

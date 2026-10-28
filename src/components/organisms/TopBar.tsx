@@ -35,21 +35,24 @@ export const TopBar: React.FC<TopBarProps> = ({
 
   return (
     <header
+      style={{
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+      }}
       className={cn(
-        'fixed top-0 inset-x-0 z-40 h-13 sm:h-15 pt-safe bg-[#f8f7f4]/85 dark:bg-[#131315]/85 backdrop-blur-xl border-b border-black/5 dark:border-white/5 select-none transition-all duration-300 ease-out',
+        'fixed top-0 inset-x-0 z-40 pt-safe bg-[#f8f7f4]/85 dark:bg-[#131315]/85 backdrop-blur-xl border-b border-black/5 dark:border-white/5 select-none transition-all duration-300 ease-out',
         isVisible
           ? 'translate-y-0 opacity-100 pointer-events-auto'
           : '-translate-y-full opacity-0 pointer-events-none'
       )}
     >
-      <div className="h-full px-3 sm:px-6 flex items-center justify-between">
+      <div className="h-13 sm:h-15 px-3 sm:px-6 flex items-center justify-between">
         {/* Identidad de la aplicacion, boton de inicio y acceso al explorador de libros */}
         <div className="flex items-center gap-1.5 sm:gap-2.5">
           {/* Boton de inicio y racha diaria */}
           <button
             type="button"
             onClick={onOpenWelcome}
-            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full bg-[#edece6] hover:bg-[#e4e2db] dark:bg-[#201f22] dark:hover:bg-[#2a2a2c] border border-black/5 dark:border-white/10 flex items-center justify-center text-black/80 dark:text-white transition-all active:scale-95 shadow-xs"
+            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full bg-[#edece6] hover:bg-[#e4e2db] dark:bg-[#201f22] dark:hover:bg-[#2a2a2c] border border-black/5 dark:border-white/10 flex items-center justify-center text-black/80 dark:text-white transition-all active:scale-95 shadow-xs cursor-pointer"
             title="Inicio y Racha de Lectura"
             aria-label="Abrir inicio y racha"
           >
@@ -60,7 +63,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           <button
             type="button"
             onClick={onOpenExplorer}
-            className="flex items-center gap-2 rounded-full bg-[#edece6] hover:bg-[#e4e2db] dark:bg-[#201f22] dark:hover:bg-[#2a2a2c] px-2.5 py-1 sm:px-3.5 sm:py-1.5 border border-black/5 dark:border-white/10 transition-all active:scale-95 text-left group shadow-xs"
+            className="flex items-center gap-2 rounded-full bg-[#edece6] hover:bg-[#e4e2db] dark:bg-[#201f22] dark:hover:bg-[#2a2a2c] px-2.5 py-1 sm:px-3.5 sm:py-1.5 border border-black/5 dark:border-white/10 transition-all active:scale-95 text-left group shadow-xs cursor-pointer"
           >
             <Library className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-black/80 dark:text-white group-hover:scale-110 transition-transform" />
             <div className="flex flex-col">
@@ -88,7 +91,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           <button
             type="button"
             onClick={onToggleTheme}
-            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full bg-[#edece6] hover:bg-[#e4e2db] dark:bg-[#201f22] dark:hover:bg-[#2a2a2c] border border-black/5 dark:border-white/10 flex items-center justify-center text-black/80 dark:text-white transition-all active:scale-95 shadow-xs"
+            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full bg-[#edece6] hover:bg-[#e4e2db] dark:bg-[#201f22] dark:hover:bg-[#2a2a2c] border border-black/5 dark:border-white/10 flex items-center justify-center text-black/80 dark:text-white transition-all active:scale-95 shadow-xs cursor-pointer"
             title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
             aria-label="Alternar tema de apariencia"
           >
@@ -103,7 +106,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           <button
             type="button"
             onClick={handleVersionClick}
-            className="h-8 px-2.5 sm:h-8.5 sm:px-3 rounded-full bg-[#edece6] hover:bg-[#e4e2db] dark:bg-[#201f22] dark:hover:bg-[#2a2a2c] border border-black/5 dark:border-white/10 flex items-center gap-1 text-black dark:text-white transition-all active:scale-95 shadow-xs"
+            className="h-8 px-2.5 sm:h-8.5 sm:px-3 rounded-full bg-[#edece6] hover:bg-[#e4e2db] dark:bg-[#201f22] dark:hover:bg-[#2a2a2c] border border-black/5 dark:border-white/10 flex items-center gap-1 text-black dark:text-white transition-all active:scale-95 shadow-xs cursor-pointer"
             title="Seleccionar traduccion de la Biblia"
           >
             <span className="text-[11px] sm:text-xs font-bold tracking-wider text-black dark:text-white">
@@ -117,7 +120,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             type="button"
             onClick={onOpenProfile}
             aria-label="Perfil y Guardados"
-            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full bg-[#18181b] hover:bg-black dark:bg-white dark:hover:bg-white/90 text-white dark:text-black flex items-center justify-center transition-all active:scale-95 shadow-sm"
+            className="h-8 w-8 sm:h-8.5 sm:w-8.5 rounded-full bg-[#18181b] hover:bg-black dark:bg-white dark:hover:bg-white/90 text-white dark:text-black flex items-center justify-center transition-all active:scale-95 shadow-sm cursor-pointer"
           >
             <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 stroke-[2.5]" />
           </button>

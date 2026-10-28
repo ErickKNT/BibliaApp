@@ -50,7 +50,13 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
       : 'Buenas noches';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 animate-in fade-in select-none">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 animate-in fade-in select-none"
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)',
+      }}
+    >
       {/* Velo de desenfoque de fondo */}
       <div
         onClick={onClose}

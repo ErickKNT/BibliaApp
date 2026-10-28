@@ -87,7 +87,13 @@ export const BookExplorerModal: React.FC<BookExplorerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 animate-in fade-in select-none">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 animate-in fade-in select-none"
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)',
+      }}
+    >
       {/* Velo de fondo oscuro */}
       <div
         onClick={onClose}

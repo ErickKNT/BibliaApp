@@ -239,6 +239,16 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
     * Indicador no intrusivo de conexion en `TopBar.tsx` y aviso flotante de modo sin conexion en `FeedPage.tsx`.
     * Actualizacion de encabezados HTTP en `vercel.json` (`Cache-Control: public, max-age=0, must-revalidate` para `sw.js`).
 
+* **Ajuste de Safe Area Insets para iPhone e iOS (Hito 7.1 - Rama feature/ios-safe-area-topbar-fix)**:
+  * Creacion de la rama de trabajo `feature/ios-safe-area-topbar-fix`.
+  * Resolucion de colision entre la barra superior `TopBar` y los elementos del sistema de iOS (reloj, bateria, notch y Dynamic Island en iPhone 13/14/15/16):
+    * Se agrego soporte nativo de utilidades `pt-safe`, `pb-safe`, `pl-safe` y `pr-safe` en `src/index.css` utilizando las variables de entorno `env(safe-area-inset-*)`.
+    * En `TopBar.tsx`, el contenedor `<header>` adopta `padding-top: env(safe-area-inset-top, 0px)` sin altura fija, mientras que el contenedor interno de acciones mantiene su altura ergonomica de 52px. El fondo de vidrio esmerilado cubre toda la barra de estado superior, mientras que los botones de interaccion se desplazan hacia abajo fuera del alcance del reloj y la bateria.
+    * En `VerseCard.tsx`, el padding superior e inferior se ajusta dinamicamente con `calc(env(safe-area-inset-top, 0px) + 3.75rem)` y `calc(env(safe-area-inset-bottom, 0px) + 1.25rem)` para evitar colisiones con el TopBar o la barra indicadora de inicio de iOS.
+    * En `VerseActionBar.tsx`, la posicion inferior se protege con `bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem)`.
+    * En todos los modales (`ProfileModal`, `BookExplorerModal`, `WelcomeModal`, `VersionSelectorModal`, `AuthModal`, `NotesModal`), se protegen las cabeceras y botones de cierre con cotas de safe area.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
@@ -257,6 +267,7 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 * **ADR-015 (Bienvenida Contextual Diaria no Intrusiva):** Despliegue de bienvenida una sola vez por jornada natural con versiculo inspiracional y estado de meta, facilitando la transicion directa al feed de lectura sin friccion.
 * **ADR-016 (Perfil Progresivo y Sincronizacion de Racha en la Nube con Supabase Auth):** El acceso y lectura de toda la Biblia permanece 100% abierto sin forzar registro previo. Los datos de lectura y racha se generan de inmediato de forma local; cuando el lector decide registrarse o iniciar sesion, una migracion silenciosa y transparente traslada todo su historial acumulado hacia Supabase (tablas `user_profiles` y `user_streaks`), permitiendo persistencia multi-dispositivo sin friccion de entrada.
 * **ADR-017 (Arquitectura PWA Hibrida y Resiliencia Offline sin Dependencias Pesadas):** Se opto por un Service Worker nativo puro junto a una doble capa de persistencia (CacheStorage para el App Shell y peticiones de red, y LocalStorage estructurado para versiculos y lecturas). Esta arquitectura garantiza arranque instantaneo offline y compatibilidad total con Lighthouse, Chrome, Edge y Safari iOS sin agregar dependencias pesadas de terceros.
+* **ADR-018 (Adaptacion Dinamica a Safe Area Insets de iOS):** El soporte de `viewport-fit=cover` en iOS PWA exige que la barra de navegacion superior desacople su fondo de su contenido interactivo. El `<header>` extiende su fondo hasta el borde fisico superior de la pantalla mediante `paddingTop: env(safe-area-inset-top, 0px)`, garantizando una inmersion visual completa sin que los elementos de control se solapen con la barra de estado o impidan la interaccion tactil.
 
 ---
 

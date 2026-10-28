@@ -646,7 +646,12 @@ export const FeedPage: React.FC = () => {
 
       {/* Indicador flotante no intrusivo de lectura offline */}
       {isOffline && (
-        <div className="fixed top-14 sm:top-16 inset-x-0 z-30 flex justify-center pointer-events-none px-4">
+        <div
+          className="fixed inset-x-0 z-30 flex justify-center pointer-events-none px-4 transition-all duration-300"
+          style={{
+            top: 'calc(env(safe-area-inset-top, 0px) + 3.75rem)',
+          }}
+        >
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 dark:bg-amber-400/15 text-amber-800 dark:text-amber-200 border border-amber-500/30 text-xs font-semibold backdrop-blur-md shadow-md animate-in fade-in slide-in-from-top-2 duration-300">
             <WifiOff className="h-3.5 w-3.5 shrink-0" />
             <span>Modo sin conexión · Lectura local activa</span>
