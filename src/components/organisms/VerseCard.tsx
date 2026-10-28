@@ -1,33 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import type { Verse } from '@/types/bible';
 import { Heart, ArrowUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface VerseCardProps {
   verse: Verse;
   isLiked?: boolean;
   fontSize?: 'normal' | 'grande' | 'extra';
+  isHudVisible?: boolean;
   onLikeToggle?: (verseId: string) => void;
+  onToggleHud?: () => void;
 }
 
 export const VerseCard: React.FC<VerseCardProps> = ({
   verse,
   isLiked = false,
   fontSize = 'normal',
+  isHudVisible = true,
   onLikeToggle,
+  onToggleHud,
 }) => {
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const [lastTap, setLastTap] = useState<number>(0);
+  const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Doble toque en cualquier parte de la tarjeta para dar Me gusta
-  const handleTap = () => {
+  // Distinguir entre toque simple (conmutar HUD) y doble toque (dar Me gusta)
+  const handleTap = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button, a')) return;
+
     const now = Date.now();
-    const DOUBLE_TAP_DELAY = 300;
+    const DOUBLE_TAP_DELAY = 260;
+
     if (now - lastTap < DOUBLE_TAP_DELAY) {
+      if (tapTimeoutRef.current) {
+        clearTimeout(tapTimeoutRef.current);
+        tapTimeoutRef.current = null;
+      }
       if (!isLiked) {
         onLikeToggle?.(verse.id);
       }
       setShowHeartAnim(true);
       setTimeout(() => setShowHeartAnim(false), 700);
+    } else {
+      if (tapTimeoutRef.current) {
+        clearTimeout(tapTimeoutRef.current);
+      }
+      tapTimeoutRef.current = setTimeout(() => {
+        onToggleHud?.();
+        tapTimeoutRef.current = null;
+      }, DOUBLE_TAP_DELAY);
     }
     setLastTap(now);
   };
@@ -42,7 +63,7 @@ export const VerseCard: React.FC<VerseCardProps> = ({
     <article
       data-verse-id={verse.id}
       onClick={handleTap}
-      className="verse-snap-card relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden bg-[#f8f7f4] dark:bg-[#131315] px-5 sm:px-12 pt-16 sm:pt-20 pb-6 sm:pb-8 snap-start select-none transition-colors duration-200"
+      className="verse-snap-card relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden bg-[#f8f7f4] dark:bg-[#131315] px-5 sm:px-12 pt-16 sm:pt-20 pb-6 sm:pb-8 snap-start select-none transition-colors duration-200 cursor-pointer"
     >
       {/* Resplandor ambiental de profundidad segun tema */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
@@ -87,7 +108,12 @@ export const VerseCard: React.FC<VerseCardProps> = ({
       </main>
 
       {/* Indicador inferior de avance y deslizamiento discreto */}
-      <div className="relative z-10 w-full flex flex-col items-center justify-center pb-1 shrink-0">
+      <div
+        className={cn(
+          'relative z-10 w-full flex flex-col items-center justify-center pb-1 shrink-0 transition-opacity duration-300',
+          isHudVisible ? 'opacity-100' : 'opacity-0'
+        )}
+      >
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#edece6]/80 dark:bg-[#1c1b1d]/70 backdrop-blur-md border border-black/5 dark:border-white/5 shadow-xs">
           <span className="text-[10px] sm:text-[11px] font-medium tracking-wider text-black/60 dark:text-white/60">
             Desliza para versiculo siguiente

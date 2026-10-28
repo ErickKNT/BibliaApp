@@ -190,6 +190,18 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
     * Ajuste sutil del indicador inferior de desplazamiento.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Modo Lectura Inmersiva Total (Auto-Hide HUD) y Selector Modal de Versiones (Hito 6.15 - Rama feature/immersive-hud-version-selector)**:
+  * Creacion de la rama de trabajo `feature/immersive-hud-version-selector`.
+  * Implementacion del Modo Inmersivo Zen:
+    * Temporizador de inactividad de 3.5 segundos que desvanece y oculta suavemente la barra superior `TopBar`, el riel flotante `VerseActionBar` y los indicadores secundarios con transiciones CSS fluidas (`duration-300`).
+    * Despertar instantaneo del HUD ante desplazamiento (scroll) o toque de pantalla.
+    * Convivencia limpia entre toque simple (conmutar mostrar/ocultar HUD) y doble toque (dar "Me gusta" con animacion de corazon).
+    * Congelamiento inteligente del temporizador mientras cualquier modal este abierto.
+  * Creacion de `VersionSelectorModal.tsx`:
+    * Modal dedicado para seleccion de traducciones biblicas (`RVR1960`, `RVR09`, `BL95`, `WEB`) con tarjetas descriptivas, insignias y marcas de verificacion reactivas.
+    * Reemplazo del ciclo secuencial de versiones en `TopBar` por la apertura de este selector interactivo.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.

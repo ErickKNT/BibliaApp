@@ -8,6 +8,7 @@ export interface VerseActionBarProps {
   likeCount?: number;
   isBookmarked?: boolean;
   notesCount?: number;
+  isVisible?: boolean;
   className?: string;
   onLikeToggle?: () => void;
   onBookmarkToggle?: () => void;
@@ -20,6 +21,7 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
   likeCount = 0,
   isBookmarked = false,
   notesCount = 0,
+  isVisible = true,
   className,
   onLikeToggle,
   onBookmarkToggle,
@@ -30,7 +32,10 @@ export const VerseActionBar: React.FC<VerseActionBarProps> = ({
     <aside
       aria-label="Acciones del versiculo"
       className={cn(
-        'fixed bottom-20 sm:bottom-24 right-3 sm:right-6 z-30 flex flex-col items-center gap-2.5 sm:gap-3.5 select-none pointer-events-auto',
+        'fixed bottom-20 sm:bottom-24 right-3 sm:right-6 z-30 flex flex-col items-center gap-2.5 sm:gap-3.5 select-none transition-all duration-300 ease-out pointer-events-auto',
+        isVisible
+          ? 'translate-x-0 opacity-100'
+          : 'translate-x-12 opacity-0 pointer-events-none',
         className
       )}
     >

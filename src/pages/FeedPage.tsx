@@ -9,6 +9,7 @@ import { BookExplorerModal } from '@/components/organisms/BookExplorerModal';
 import { ProfileModal } from '@/components/organisms/ProfileModal';
 import { WelcomeModal } from '@/components/organisms/WelcomeModal';
 import { AuthModal } from '@/components/organisms/AuthModal';
+import { VersionSelectorModal } from '@/components/organisms/VersionSelectorModal';
 import {
   getFeedVerses,
   getVersesByBookAndChapter,
@@ -85,9 +86,82 @@ export const FeedPage: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalInitialView, setAuthModalInitialView] = useState<'login' | 'register' | 'recovery'>('register');
+  const [isVersionSelectorOpen, setIsVersionSelectorOpen] = useState(false);
 
   // Estado de usuario en Supabase (invitado o registrado)
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
+
+  // Modo Lectura Inmersiva Total (Auto-Hide HUD)
+  const [isHudVisible, setIsHudVisible] = useState<boolean>(true);
+  const hideHudTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const isAnyModalOpen =
+    isExplorerOpen ||
+    isProfileOpen ||
+    isAuthModalOpen ||
+    isWelcomeOpen ||
+    isVersionSelectorOpen ||
+    Boolean(activeVerseForNotes);
+
+  const resetHudTimer = useCallback((showImmediately = true) => {
+    if (showImmediately) {
+      setIsHudVisible(true);
+    }
+    if (hideHudTimeoutRef.current) {
+      clearTimeout(hideHudTimeoutRef.current);
+      hideHudTimeoutRef.current = null;
+    }
+
+    if (
+      isExplorerOpen ||
+      isProfileOpen ||
+      isAuthModalOpen ||
+      isWelcomeOpen ||
+      isVersionSelectorOpen ||
+      Boolean(activeVerseForNotes)
+    ) {
+      return;
+    }
+
+    hideHudTimeoutRef.current = setTimeout(() => {
+      setIsHudVisible(false);
+    }, 3500);
+  }, [
+    isExplorerOpen,
+    isProfileOpen,
+    isAuthModalOpen,
+    isWelcomeOpen,
+    isVersionSelectorOpen,
+    activeVerseForNotes,
+  ]);
+
+  // Congelar / reactivar temporizador cuando se abre o cierra algun modal
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      setIsHudVisible(true);
+      if (hideHudTimeoutRef.current) {
+        clearTimeout(hideHudTimeoutRef.current);
+        hideHudTimeoutRef.current = null;
+      }
+    } else {
+      resetHudTimer(true);
+    }
+  }, [isAnyModalOpen, resetHudTimer]);
+
+  const handleToggleHud = () => {
+    setIsHudVisible((prev) => {
+      const next = !prev;
+      if (next) {
+        resetHudTimer(true);
+      } else {
+        if (hideHudTimeoutRef.current) {
+          clearTimeout(hideHudTimeoutRef.current);
+          hideHudTimeoutRef.current = null;
+        }
+      }
+      return next;
+    });
+  };
 
   const feedContainerRef = useRef<HTMLDivElement>(null);
   const isFetchingMoreRef = useRef<boolean>(false);
@@ -226,8 +300,19 @@ export const FeedPage: React.FC = () => {
 
     cards.forEach((card) => observer.observe(card));
 
-    return () => observer.disconnect();
-  }, [verses]);
+    const handleFeedActivity = () => {
+      resetHudTimer(true);
+    };
+
+    container.addEventListener('scroll', handleFeedActivity, { passive: true });
+    container.addEventListener('touchstart', handleFeedActivity, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      container.removeEventListener('scroll', handleFeedActivity);
+      container.removeEventListener('touchstart', handleFeedActivity);
+    };
+  }, [verses, resetHudTimer]);
 
   // Cargar mas versiculos de forma continua al aproximarse al final del feed
   useEffect(() => {
@@ -501,21 +586,24 @@ export const FeedPage: React.FC = () => {
 
   return (
     <div className="relative h-full w-full bg-[#f8f7f4] dark:bg-[#131315] text-[#18181b] dark:text-white transition-colors duration-200">
-      {/* Barra superior fija con soporte de tema claro/oscuro */}
+      {/* Barra superior fija con soporte de tema claro/oscuro y modo inmersivo */}
       <TopBar
         currentVersion={currentVersion}
         activeBookName={activeVerse?.bookName || lastReading.bookName}
         activeChapter={activeVerse?.chapter || lastReading.chapter}
         theme={theme}
+        isVisible={isHudVisible}
         onToggleTheme={handleToggleTheme}
         onOpenExplorer={() => setIsExplorerOpen(true)}
         onOpenProfile={() => setIsProfileOpen(true)}
+        onOpenVersionSelector={() => setIsVersionSelectorOpen(true)}
         onVersionSelect={handleVersionCycle}
       />
 
       {/* Riel flotante lateral persistente (HUD fijo en pantalla) */}
       {activeVerse && (
         <VerseActionBar
+          isVisible={isHudVisible}
           isLiked={likedVerseIds.has(activeVerse.id)}
           likeCount={
             activeVerse.likeCount
@@ -555,7 +643,9 @@ export const FeedPage: React.FC = () => {
               }}
               isLiked={likedVerseIds.has(verse.id)}
               fontSize={fontSize}
+              isHudVisible={isHudVisible}
               onLikeToggle={handleLikeToggle}
+              onToggleHud={handleToggleHud}
             />
           ))}
 
@@ -631,6 +721,14 @@ export const FeedPage: React.FC = () => {
         initialView={authModalInitialView}
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
+      />
+
+      {/* Modal Selector de Traduccion Biblica */}
+      <VersionSelectorModal
+        isOpen={isVersionSelectorOpen}
+        currentVersion={currentVersion}
+        onClose={() => setIsVersionSelectorOpen(false)}
+        onSelectVersion={handleSelectVersion}
       />
     </div>
   );

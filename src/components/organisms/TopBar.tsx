@@ -1,15 +1,18 @@
 import React from 'react';
 import { BookOpen, User, Library, ChevronDown, Sun, Moon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface TopBarProps {
   currentVersion: string;
   activeBookName?: string;
   activeChapter?: number;
   theme?: 'dark' | 'light' | 'system';
+  isVisible?: boolean;
   onToggleTheme?: () => void;
   onOpenExplorer?: () => void;
   onOpenProfile?: () => void;
   onVersionSelect?: () => void;
+  onOpenVersionSelector?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -17,13 +20,24 @@ export const TopBar: React.FC<TopBarProps> = ({
   activeBookName,
   activeChapter,
   theme = 'dark',
+  isVisible = true,
   onToggleTheme,
   onOpenExplorer,
   onOpenProfile,
   onVersionSelect,
+  onOpenVersionSelector,
 }) => {
+  const handleVersionClick = onOpenVersionSelector || onVersionSelect;
+
   return (
-    <header className="fixed top-0 inset-x-0 z-40 h-13 sm:h-15 pt-safe bg-[#f8f7f4]/85 dark:bg-[#131315]/85 backdrop-blur-xl border-b border-black/5 dark:border-white/5 select-none transition-colors duration-200">
+    <header
+      className={cn(
+        'fixed top-0 inset-x-0 z-40 h-13 sm:h-15 pt-safe bg-[#f8f7f4]/85 dark:bg-[#131315]/85 backdrop-blur-xl border-b border-black/5 dark:border-white/5 select-none transition-all duration-300 ease-out',
+        isVisible
+          ? 'translate-y-0 opacity-100 pointer-events-auto'
+          : '-translate-y-full opacity-0 pointer-events-none'
+      )}
+    >
       <div className="h-full px-3 sm:px-6 flex items-center justify-between">
         {/* Identidad de la aplicacion y acceso al explorador de libros */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -61,12 +75,12 @@ export const TopBar: React.FC<TopBarProps> = ({
             )}
           </button>
 
-          {/* Selector de traduccion */}
+          {/* Selector modal de traduccion */}
           <button
             type="button"
-            onClick={onVersionSelect}
+            onClick={handleVersionClick}
             className="h-8 px-2.5 sm:h-8.5 sm:px-3 rounded-full bg-[#edece6] hover:bg-[#e4e2db] dark:bg-[#201f22] dark:hover:bg-[#2a2a2c] border border-black/5 dark:border-white/10 flex items-center gap-1 text-black dark:text-white transition-all active:scale-95 shadow-xs"
-            title="Cambiar traduccion de la Biblia"
+            title="Seleccionar traduccion de la Biblia"
           >
             <span className="text-[11px] sm:text-xs font-bold tracking-wider text-black dark:text-white">
               {currentVersion}
