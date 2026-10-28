@@ -1,5 +1,10 @@
 import React from 'react';
-import { X, Flame, Sparkles, BookOpen, ArrowRight, Check, ShieldCheck } from 'lucide-react';
+import { X, Flame, Sparkles, BookOpen, ArrowRight, Check, ShieldCheck, Shuffle } from 'lucide-react';
+import {
+  getRandomInspirationalVerse,
+  getInspirationalVerseText,
+  type InspirationalVerse,
+} from '@/data/inspirationalVerses';
 import type { StreakDay } from '@/services/streakService';
 
 export interface WelcomeModalProps {
@@ -19,34 +24,6 @@ export interface WelcomeModalProps {
   onOpenAuth?: (view: 'login' | 'register') => void;
 }
 
-// Versiculos diarios inspiracionales adaptados a cada traduccion
-const DAILY_VERSES: Record<string, { text: string; reference: string }> = {
-  RVR1960: {
-    text: 'Lámpara es a mis pies tu palabra, Y lumbrera a mi camino.',
-    reference: 'Salmos 119:105',
-  },
-  NVI: {
-    text: 'Tu palabra es una lámpara a mis pies; es una luz en mi sendero.',
-    reference: 'Salmo 119:105',
-  },
-  NTV: {
-    text: 'Tu palabra es una lámpara que guía mis pies y una luz para mi camino.',
-    reference: 'Salmos 119:105',
-  },
-  RVR09: {
-    text: 'Lámpara es a mis pies tu palabra, Y lumbrera a mi camino.',
-    reference: 'Salmos 119:105',
-  },
-  BL95: {
-    text: 'Tu palabra es una lámpara para mis pasos, una luz en mi sendero.',
-    reference: 'Salmo 119:105',
-  },
-  WEB: {
-    text: 'Your word is a lamp to my feet, and a light for my path.',
-    reference: 'Psalm 119:105',
-  },
-};
-
 export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   isOpen,
   userName,
@@ -60,9 +37,19 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   onResumeReading,
   onOpenAuth,
 }) => {
+  const [inspirationalVerse, setInspirationalVerse] = React.useState<InspirationalVerse>(() =>
+    getRandomInspirationalVerse()
+  );
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setInspirationalVerse(getRandomInspirationalVerse());
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  const dailyVerse = DAILY_VERSES[currentVersion] || DAILY_VERSES['RVR1960'];
+  const currentVerseData = getInspirationalVerseText(inspirationalVerse, currentVersion);
   const currentHour = new Date().getHours();
   const greeting =
     currentHour < 12
@@ -178,14 +165,25 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
 
           {/* Tarjeta de Versiculo del Dia */}
           <div className="rounded-2xl border border-black/5 dark:border-white/5 bg-[#edece6] dark:bg-[#201f22] p-4 text-left">
-            <span className="text-[11px] font-bold text-black/50 dark:text-white/50 uppercase tracking-wider block mb-1.5">
-              Versículo para reflexionar
-            </span>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] font-bold text-black/50 dark:text-white/50 uppercase tracking-wider">
+                Versículo para reflexionar
+              </span>
+              <button
+                type="button"
+                onClick={() => setInspirationalVerse((prev) => getRandomInspirationalVerse(prev?.id))}
+                className="h-6 w-6 rounded-full flex items-center justify-center text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                title="Mostrar otro versículo de reflexión"
+                aria-label="Cambiar versículo"
+              >
+                <Shuffle className="h-3 w-3" />
+              </button>
+            </div>
             <blockquote className="font-serif text-sm sm:text-base leading-relaxed text-black/90 dark:text-white/90">
-              “{dailyVerse.text}”
+              “{currentVerseData.text}”
             </blockquote>
             <span className="text-xs font-semibold text-black/60 dark:text-white/60 block mt-2">
-              — {dailyVerse.reference} ({currentVersion})
+              — {currentVerseData.reference} ({currentVersion})
             </span>
           </div>
 

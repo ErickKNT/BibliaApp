@@ -6,6 +6,8 @@ export interface TopBarProps {
   currentVersion: string;
   activeBookName?: string;
   activeChapter?: number;
+  currentVerseNumber?: number;
+  totalChapterVerses?: number;
   theme?: 'dark' | 'light' | 'system';
   isVisible?: boolean;
   isOffline?: boolean;
@@ -21,6 +23,8 @@ export const TopBar: React.FC<TopBarProps> = ({
   currentVersion,
   activeBookName,
   activeChapter,
+  currentVerseNumber,
+  totalChapterVerses,
   theme = 'dark',
   isVisible = true,
   isOffline = false,
@@ -72,7 +76,13 @@ export const TopBar: React.FC<TopBarProps> = ({
                 {activeBookName ? `${activeBookName} ${activeChapter ? `· Cap. ${activeChapter}` : ''}` : 'BibliaApp'}
               </span>
               <span className="text-[9px] sm:text-[10px] text-black/50 dark:text-white/50 uppercase tracking-wider leading-tight flex items-center gap-0.5 mt-0.5">
-                Explorar Libros <ChevronDown className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+                <span>Explorar</span>
+                {Boolean(totalChapterVerses && currentVerseNumber) && (
+                  <span className="font-mono text-[9px] text-black/70 dark:text-white/70 font-semibold">
+                    · v. {currentVerseNumber}/{totalChapterVerses}
+                  </span>
+                )}
+                <ChevronDown className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
               </span>
             </div>
           </button>
@@ -127,6 +137,18 @@ export const TopBar: React.FC<TopBarProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Barra de progreso por capitulo discreta (2px hairline) */}
+      {Boolean(totalChapterVerses && totalChapterVerses > 0 && currentVerseNumber) && (
+        <div className="absolute bottom-0 inset-x-0 h-[2px] bg-black/5 dark:bg-white/10 overflow-hidden pointer-events-none">
+          <div
+            className="h-full bg-black dark:bg-white transition-all duration-300 ease-out"
+            style={{
+              width: `${Math.min(100, Math.max(0, ((currentVerseNumber || 1) / (totalChapterVerses || 1)) * 100))}%`,
+            }}
+          />
+        </div>
+      )}
     </header>
   );
 };

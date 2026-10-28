@@ -19,6 +19,7 @@ import {
   addVerseNote,
   saveLastReading,
   getLastReading,
+  getChapterVerseCount,
   type LastReading,
 } from '@/services/bibleService';
 import {
@@ -78,6 +79,7 @@ export const FeedPage: React.FC = () => {
 
   // Ultima lectura registrada
   const [lastReading, setLastReading] = useState<LastReading>(() => getLastReading());
+  const [totalChapterVerses, setTotalChapterVerses] = useState<number>(30);
 
   // Modales
   const [activeVerseForNotes, setActiveVerseForNotes] = useState<Verse | null>(null);
@@ -398,6 +400,26 @@ export const FeedPage: React.FC = () => {
   // Versiculo activo actualmente enfocado
   const activeVerse = verses.find((v) => v.id === activeVerseId) || verses[0];
 
+  // Consulta del conteo total de versiculos del capitulo activo para la barra de progreso
+  useEffect(() => {
+    if (!activeVerse?.bookOrder || !activeVerse?.chapter) return;
+
+    let isMounted = true;
+    getChapterVerseCount(activeVerse.bookOrder, activeVerse.chapter, currentVersion)
+      .then((count) => {
+        if (isMounted && count > 0) {
+          setTotalChapterVerses(count);
+        }
+      })
+      .catch((err) => {
+        console.warn('Error al calcular progreso del capitulo:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeVerse?.bookOrder, activeVerse?.chapter, currentVersion]);
+
   // Alternar tema rapidamente
   const handleToggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
@@ -643,6 +665,8 @@ export const FeedPage: React.FC = () => {
         currentVersion={currentVersion}
         activeBookName={activeVerse?.bookName || lastReading.bookName}
         activeChapter={activeVerse?.chapter || lastReading.chapter}
+        currentVerseNumber={activeVerse?.verseNumber || 1}
+        totalChapterVerses={totalChapterVerses}
         theme={theme}
         isVisible={isHudVisible}
         isOffline={isOffline}
@@ -736,6 +760,7 @@ export const FeedPage: React.FC = () => {
         isStreakCompletedToday={isStreakCompletedToday}
         isRegisteredUser={Boolean(currentUser && !currentUser.is_anonymous)}
         weeklyDays={weeklyDays}
+        currentVersion={currentVersion}
         lastReading={lastReading}
         onClose={handleCloseWelcome}
         onResumeReading={handleCloseWelcome}

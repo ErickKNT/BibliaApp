@@ -282,6 +282,11 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 * **ADR-021 (Minimalismo en Modales, Pestañas Icon-Only y Banners Descartables):** Para evitar la saturacion de elementos y desbordamientos en pantallas verticales moviles (proporciones 16:9 y 19.5:9), se adopto una interfaz minimalista de solo iconos para las pestanas de navegacion en modales (`grid grid-cols-4` simetrico con microbadges numericos condicionales), se doto al banner de invitacion de respaldo en la nube de un boton de descarte ("X") que libera espacio vertical inmediato y se restablece de forma efimera al reabrir el modal, y se optimizaron las proporciones visuales de tarjetas y filtros en WelcomeModal, BookExplorerModal y NotesModal.
 * **ADR-022 (Persistencia de Traducción Preferida, Continuidad de Racha en la Nube y Versículo Diario Dinámico):** Se resolvio la persistencia integral de la sesion del usuario: (1) La traduccion seleccionada se almacena en `localStorage` y se sincroniza bidireccionalmente con el campo `preferred_version` en la tabla `user_profiles` de Supabase, de modo que al iniciar sesion en cualquier dispositivo o PWA se carga automaticamente la version predilecta. (2) Se refactorizo el calculo de la racha (`calculateStreakFromHistory`) mediante recorrido calendárico seguro hacia atras a partir del historial real de fechas, evitando reinicios erroneos causados por particiones de almacenamiento en iOS PWA o desajustes horarios, y sincronizando de inmediato cada lectura con la tabla `user_streaks`. (3) El versiculo del dia en WelcomeModal ahora proyecta la cita biblica (Salmos 119:105) en la traduccion activa seleccionada por el usuario (RVR1960, NVI, NTV, etc.).
 
+
+* **ADR-023 (Barra de Progreso por Capitulo en Cabecera y Versiculo Diario Aleatorio Interactivo):**
+  - **Barra de Progreso por Capitulo:** Se implemento una linea hairline de 2px ultra-discreta en el borde inferior de la barra de navegacion fija TopBar, complementada por un indicador contextual sutil (v. {actual}/{total}) en la pildora central de exploracion. Para obtener el numero total de versiculos por capitulo con coste cero de transferencia de datos, se incorporo 'getChapterVerseCount' en bibleService con consultas 'head: true' en Supabase y una cache en memoria (chapterVerseCountsCache).
+  - **Versiculo Diario Aleatorio y Dinamico:** Se supero la cita fija repetitiva mediante un repositorio curado de mas de 25 pasajes devocionales emblematicos (src/data/inspirationalVerses.ts) disponibles en RVR1960, NVI y NTV. En WelcomeModal, el versiculo se selecciona aleatoriamente al ingresar a la app, se presenta en la traduccion preferida activa del lector, y cuenta con un boton discreto de barajar (Shuffle) para descubrir nuevos textos inspiracionales en cualquier momento.
+
 ---
 
 ## Hoja de Ruta de Hitos
@@ -295,3 +300,4 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
 - [x] **Hito 6:** Conexion del cliente Supabase a la UI (persistencia real de notas y likes con sesion anonima).
 - [x] **Hito 7:** Configuracion de PWA (Service Worker, manifiesto, lectura offline).
 - [x] **Hito 8:** Ingesta de traducciones contemporaneas (NVI y NTV) en Supabase con creditos editoriales visibles.
+- [x] **Hito 9:** Barra de progreso por capitulo y versiculo diario aleatorio interactivo en traduccion seleccionada.

@@ -285,6 +285,45 @@ export async function getMoreVerses(
   }
 }
 
+const chapterVerseCountsCache = new Map<string, number>();
+
+/**
+ * Obtiene el numero total de versiculos en un capitulo especifico.
+ * Utiliza cache en memoria y una consulta 'head: true' ultra-ligera en Supabase.
+ */
+export async function getChapterVerseCount(
+  bookOrder: number,
+  chapter: number,
+  version: string = 'RVR1960'
+): Promise<number> {
+  const cacheKey = `${version}_${bookOrder}_${chapter}`;
+  if (chapterVerseCountsCache.has(cacheKey)) {
+    return chapterVerseCountsCache.get(cacheKey)!;
+  }
+
+  if (!isSupabaseConfigured || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+    return 30;
+  }
+
+  try {
+    const { count, error } = await supabase
+      .from('verses')
+      .select('*', { count: 'exact', head: true })
+      .eq('version', version)
+      .eq('book_order', bookOrder)
+      .eq('chapter', chapter);
+
+    if (!error && typeof count === 'number' && count > 0) {
+      chapterVerseCountsCache.set(cacheKey, count);
+      return count;
+    }
+  } catch (err) {
+    console.warn('Error al consultar conteo de versiculos de capitulo:', err);
+  }
+
+  return 30;
+}
+
 /**
  * Persiste la ultima lectura del usuario en almacenamiento local.
  */
