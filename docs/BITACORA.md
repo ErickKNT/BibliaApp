@@ -169,6 +169,13 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
   * Limpieza automatica del fragmento hash de tokens (`#access_token=...`) en la barra de direcciones de `FeedPage.tsx` al retornar de la confirmacion de correo.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Acciones Duales de Autenticacion en Perfil y Bienvenida (Hito 6.13 - Rama feature/auth-dual-action-buttons)**:
+  * Creacion de la rama de trabajo `feature/auth-dual-action-buttons`.
+  * Incorporacion del boton "Iniciar Sesion" junto a "Crear Cuenta" en el banner de invitacion de `ProfileModal.tsx`.
+  * Actualizacion del pie de pagina de `WelcomeModal.tsx` para ofrecer tanto el acceso a usuarios existentes ("Inicia Sesion") como el registro de nuevos usuarios ("Crea una cuenta gratis").
+  * Mantenimiento de la ubicacion de "Cerrar Sesion" en la seccion de Ajustes segun directiva del usuario.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.
