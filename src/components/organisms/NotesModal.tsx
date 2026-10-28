@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Verse, VerseNote } from '@/types/bible';
-import { X, Send, Lock, Globe, MessageSquare } from 'lucide-react';
+import { X, Send, Lock, Globe, MessageSquare, Layers } from 'lucide-react';
 
 export interface NotesModalProps {
   verse: Verse | null;
@@ -91,35 +91,38 @@ export const NotesModal: React.FC<NotesModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveFilter('todas')}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-medium transition-all ${
               activeFilter === 'todas'
                 ? 'bg-black text-white dark:bg-white dark:text-black font-semibold shadow-xs'
                 : 'bg-[#edece6] text-black/70 hover:text-black dark:bg-[#2a2a2c] dark:text-white/70 dark:hover:text-white'
             }`}
           >
-            Todas ({verseNotes.length})
+            <Layers className="h-3.5 w-3.5" />
+            <span>Todas ({verseNotes.length})</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveFilter('personal')}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-medium transition-all ${
               activeFilter === 'personal'
                 ? 'bg-black text-white dark:bg-white dark:text-black font-semibold shadow-xs'
                 : 'bg-[#edece6] text-black/70 hover:text-black dark:bg-[#2a2a2c] dark:text-white/70 dark:hover:text-white'
             }`}
           >
-            Mis Notas
+            <Lock className="h-3.5 w-3.5" />
+            <span>Personales</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveFilter('comunidad')}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-medium transition-all ${
               activeFilter === 'comunidad'
                 ? 'bg-black text-white dark:bg-white dark:text-black font-semibold shadow-xs'
                 : 'bg-[#edece6] text-black/70 hover:text-black dark:bg-[#2a2a2c] dark:text-white/70 dark:hover:text-white'
             }`}
           >
-            Comunidad
+            <Globe className="h-3.5 w-3.5" />
+            <span>Comunidad</span>
           </button>
         </div>
 

@@ -75,6 +75,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   const [activeTab, setActiveTab] = useState<'racha' | 'guardados' | 'notas' | 'ajustes'>('racha');
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(userProfile.name);
+  const [isBannerDismissed, setIsBannerDismissed] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsBannerDismissed(false);
+    }
+  }, [isOpen]);
 
   // Estado de instalacion PWA y conectividad
   const [canInstall, setCanInstall] = useState(false);
@@ -195,16 +202,25 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         </div>
 
         {/* Banner sutil para invitar al registro si no tiene cuenta vinculada */}
-        {!isRegisteredUser && (
-          <div className="mx-4 sm:mx-6 mt-3 p-3.5 rounded-2xl border border-black/10 dark:border-white/10 bg-[#edece6] dark:bg-[#1c1b1d] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left shrink-0 shadow-xs">
-            <div className="flex items-start gap-2.5">
+        {!isRegisteredUser && !isBannerDismissed && (
+          <div className="relative mx-3.5 sm:mx-6 mt-2.5 p-3 sm:p-3.5 rounded-2xl border border-black/10 dark:border-white/10 bg-[#edece6] dark:bg-[#1c1b1d] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-left shrink-0 shadow-xs">
+            <button
+              type="button"
+              onClick={() => setIsBannerDismissed(true)}
+              className="absolute top-2 right-2 p-1 rounded-full text-black/40 hover:text-black dark:text-white/40 dark:hover:text-white transition-colors"
+              title="Ocultar sugerencia"
+              aria-label="Cerrar sugerencia de inicio de sesión"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+            <div className="flex items-start gap-2.5 pr-6 sm:pr-0">
               <Sparkles className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
               <div>
                 <span className="text-xs font-bold text-black dark:text-white block leading-tight">
                   Protege tu constancia en la nube
                 </span>
                 <span className="text-[11px] text-black/60 dark:text-white/60 block mt-0.5 leading-relaxed">
-                  Crea tu cuenta gratuita para respaldar tu racha de {streakData.currentStreak} {streakData.currentStreak === 1 ? 'día' : 'días'} y tus notas en cualquier dispositivo.
+                  Crea tu cuenta gratuita para respaldar tu racha de {streakData.currentStreak} {streakData.currentStreak === 1 ? 'día' : 'días'} y tus notas.
                 </span>
               </div>
             </div>
@@ -212,14 +228,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenAuth?.('login')}
-                className="px-3 py-1.5 rounded-xl border border-black/15 bg-white/70 hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10 text-black dark:text-white text-xs font-bold transition-all"
+                className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-black/15 bg-white/70 hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10 text-black dark:text-white text-xs font-bold transition-all"
               >
                 Iniciar Sesión
               </button>
               <button
                 type="button"
                 onClick={() => onOpenAuth?.('register')}
-                className="px-3.5 py-1.5 rounded-xl bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 text-xs font-bold transition-all shadow-xs"
+                className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 text-xs font-bold transition-all shadow-xs"
               >
                 Crear Cuenta
               </button>
@@ -227,101 +243,128 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           </div>
         )}
 
-        {/* Tarjetas resumen de actividad */}
-        <div className="p-4 sm:p-5 grid grid-cols-3 gap-2.5 border-b border-black/5 dark:border-white/5 bg-[#f5f4ef] dark:bg-[#171618] shrink-0">
+        {/* Tarjetas resumen de actividad compactas */}
+        <div className="p-2.5 sm:p-4 grid grid-cols-3 gap-2 border-b border-black/5 dark:border-white/5 bg-[#f5f4ef] dark:bg-[#171618] shrink-0">
           {/* Racha actual */}
-          <div className="rounded-xl border border-black/5 dark:border-white/5 bg-[#edece6] dark:bg-[#201f22] p-3 flex flex-col justify-between text-left">
+          <div className="rounded-xl border border-black/5 dark:border-white/5 bg-[#edece6] dark:bg-[#201f22] p-2 sm:p-2.5 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between text-black/60 dark:text-white/60">
-              <span className="text-[10px] sm:text-[11px] font-semibold">Racha</span>
-              <Flame className="h-4 w-4 text-amber-500 fill-current" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider">Racha</span>
+              <Flame className="h-3.5 w-3.5 text-amber-500 fill-current" />
             </div>
-            <div className="mt-2">
-              <span className="text-lg sm:text-xl font-bold text-black dark:text-white block leading-none">
+            <div className="mt-1">
+              <span className="text-base sm:text-lg font-bold text-black dark:text-white block leading-none">
                 {streakData.currentStreak} d
               </span>
-              <span className="text-[10px] text-black/40 dark:text-white/40 mt-1 block">Récord: {streakData.longestStreak} d</span>
+              <span className="text-[9px] text-black/40 dark:text-white/40 mt-0.5 block">Máx: {streakData.longestStreak} d</span>
             </div>
           </div>
 
           {/* Versiculos leidos */}
-          <div className="rounded-xl border border-black/5 dark:border-white/5 bg-[#edece6] dark:bg-[#201f22] p-3 flex flex-col justify-between text-left">
+          <div className="rounded-xl border border-black/5 dark:border-white/5 bg-[#edece6] dark:bg-[#201f22] p-2 sm:p-2.5 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between text-black/60 dark:text-white/60">
-              <span className="text-[10px] sm:text-[11px] font-semibold">Leídos</span>
-              <Calendar className="h-4 w-4 text-black dark:text-white" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider">Leídos</span>
+              <Calendar className="h-3.5 w-3.5 text-black dark:text-white" />
             </div>
-            <div className="mt-2">
-              <span className="text-lg sm:text-xl font-bold text-black dark:text-white block leading-none">
+            <div className="mt-1">
+              <span className="text-base sm:text-lg font-bold text-black dark:text-white block leading-none">
                 {streakData.totalVersesRead}
               </span>
-              <span className="text-[10px] text-black/40 dark:text-white/40 mt-1 block">versículos</span>
+              <span className="text-[9px] text-black/40 dark:text-white/40 mt-0.5 block">versículos</span>
             </div>
           </div>
 
           {/* Guardados */}
-          <div className="rounded-xl border border-black/5 dark:border-white/5 bg-[#edece6] dark:bg-[#201f22] p-3 flex flex-col justify-between text-left">
+          <div className="rounded-xl border border-black/5 dark:border-white/5 bg-[#edece6] dark:bg-[#201f22] p-2 sm:p-2.5 flex flex-col justify-between text-left">
             <div className="flex items-center justify-between text-black/60 dark:text-white/60">
-              <span className="text-[10px] sm:text-[11px] font-semibold">Colección</span>
-              <Bookmark className="h-4 w-4 text-black dark:text-white" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider">Colección</span>
+              <Bookmark className="h-3.5 w-3.5 text-black dark:text-white" />
             </div>
-            <div className="mt-2">
-              <span className="text-lg sm:text-xl font-bold text-black dark:text-white block leading-none">
+            <div className="mt-1">
+              <span className="text-base sm:text-lg font-bold text-black dark:text-white block leading-none">
                 {bookmarkedVerses.length}
               </span>
-              <span className="text-[10px] text-black/40 dark:text-white/40 mt-1 block">guardados</span>
+              <span className="text-[9px] text-black/40 dark:text-white/40 mt-0.5 block">guardados</span>
             </div>
           </div>
         </div>
 
-        {/* Pestañas de navegacion del perfil */}
-        <div className="px-5 sm:px-6 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar border-b border-black/5 dark:border-white/5 bg-[#edece6]/70 dark:bg-[#141416] shrink-0">
-          <button
-            type="button"
-            onClick={() => setActiveTab('racha')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === 'racha'
-                ? 'bg-black text-white dark:bg-white dark:text-black shadow-xs'
-                : 'text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white'
-            }`}
-          >
-            <Flame className="h-3.5 w-3.5" />
-            Racha & Hábitos
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('guardados')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === 'guardados'
-                ? 'bg-black text-white dark:bg-white dark:text-black shadow-xs'
-                : 'text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white'
-            }`}
-          >
-            <Bookmark className="h-3.5 w-3.5" />
-            Guardados ({bookmarkedVerses.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('notas')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === 'notas'
-                ? 'bg-black text-white dark:bg-white dark:text-black shadow-xs'
-                : 'text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white'
-            }`}
-          >
-            <FileText className="h-3.5 w-3.5" />
-            Reflexiones ({notes.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('ajustes')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === 'ajustes'
-                ? 'bg-black text-white dark:bg-white dark:text-black shadow-xs'
-                : 'text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white'
-            }`}
-          >
-            <Settings className="h-3.5 w-3.5" />
-            Ajustes
-          </button>
+        {/* Pestañas de navegación solo con iconos (Segmented Control Minimalista) */}
+        <div className="px-3.5 sm:px-6 py-2 border-b border-black/5 dark:border-white/5 bg-[#edece6]/70 dark:bg-[#141416] shrink-0">
+          <div className="grid grid-cols-4 gap-1 p-1 rounded-xl bg-black/5 dark:bg-white/5">
+            <button
+              type="button"
+              onClick={() => setActiveTab('racha')}
+              title="Racha y Hábitos"
+              aria-label="Racha y Hábitos"
+              className={`relative py-2 flex items-center justify-center rounded-lg transition-all ${
+                activeTab === 'racha'
+                  ? 'bg-black text-white dark:bg-white dark:text-black shadow-xs'
+                  : 'text-black/50 hover:text-black dark:text-white/50 dark:hover:text-white'
+              }`}
+            >
+              <Flame className="h-4 w-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('guardados')}
+              title={`Guardados (${bookmarkedVerses.length})`}
+              aria-label="Versículos Guardados"
+              className={`relative py-2 flex items-center justify-center rounded-lg transition-all ${
+                activeTab === 'guardados'
+                  ? 'bg-black text-white dark:bg-white dark:text-black shadow-xs'
+                  : 'text-black/50 hover:text-black dark:text-white/50 dark:hover:text-white'
+              }`}
+            >
+              <Bookmark className="h-4 w-4" />
+              {bookmarkedVerses.length > 0 && (
+                <span className={`absolute top-1 right-2 sm:right-6 px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                  activeTab === 'guardados'
+                    ? 'bg-white text-black dark:bg-black dark:text-white'
+                    : 'bg-black/10 dark:bg-white/20 text-black dark:text-white'
+                }`}>
+                  {bookmarkedVerses.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('notas')}
+              title={`Reflexiones y Notas (${notes.length})`}
+              aria-label="Notas y Reflexiones"
+              className={`relative py-2 flex items-center justify-center rounded-lg transition-all ${
+                activeTab === 'notas'
+                  ? 'bg-black text-white dark:bg-white dark:text-black shadow-xs'
+                  : 'text-black/50 hover:text-black dark:text-white/50 dark:hover:text-white'
+              }`}
+            >
+              <FileText className="h-4 w-4" />
+              {notes.length > 0 && (
+                <span className={`absolute top-1 right-2 sm:right-6 px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                  activeTab === 'notas'
+                    ? 'bg-white text-black dark:bg-black dark:text-white'
+                    : 'bg-black/10 dark:bg-white/20 text-black dark:text-white'
+                }`}>
+                  {notes.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('ajustes')}
+              title="Ajustes y Configuración"
+              aria-label="Ajustes"
+              className={`relative py-2 flex items-center justify-center rounded-lg transition-all ${
+                activeTab === 'ajustes'
+                  ? 'bg-black text-white dark:bg-white dark:text-black shadow-xs'
+                  : 'text-black/50 hover:text-black dark:text-white/50 dark:hover:text-white'
+              }`}
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* Contenido segun pestana */}

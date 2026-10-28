@@ -108,7 +108,7 @@ export const BookExplorerModal: React.FC<BookExplorerModalProps> = ({
       >
         {/* Cabecera segun la vista activa */}
         {view === 'books' ? (
-          <div className="px-5 sm:px-6 pt-4 pb-3 sm:py-4 flex items-center justify-between border-b border-black/5 dark:border-white/5 shrink-0 bg-[#fcfbf9] dark:bg-[#131315]">
+          <div className="px-4 sm:px-6 pt-3.5 pb-2.5 sm:py-3.5 flex items-center justify-between border-b border-black/5 dark:border-white/5 shrink-0 bg-[#fcfbf9] dark:bg-[#131315]">
             <div className="flex items-center gap-2.5">
               <Book className="h-5 w-5 text-black dark:text-white" />
               <div>
@@ -197,7 +197,7 @@ export const BookExplorerModal: React.FC<BookExplorerModalProps> = ({
                       : 'text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white'
                   }`}
                 >
-                  Antiguo Testamento (39)
+                  Antiguo (39)
                 </button>
                 <button
                   type="button"
@@ -211,7 +211,7 @@ export const BookExplorerModal: React.FC<BookExplorerModalProps> = ({
                       : 'text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white'
                   }`}
                 >
-                  Nuevo Testamento (27)
+                  Nuevo (27)
                 </button>
               </div>
             )}

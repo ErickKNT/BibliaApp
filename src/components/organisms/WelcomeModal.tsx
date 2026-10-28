@@ -70,7 +70,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
         className="pointer-events-auto relative z-10 flex h-auto max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col rounded-2xl sm:rounded-3xl border border-black/10 dark:border-white/10 bg-[#fcfbf9] dark:bg-[#131315] text-[#18181b] dark:text-white shadow-xl overflow-hidden min-h-0 transition-colors duration-200"
       >
         {/* Cabecera con saludo contextual */}
-        <div className="px-6 pt-5 pb-3 flex items-start justify-between border-b border-black/5 dark:border-white/5 shrink-0 bg-[#fcfbf9] dark:bg-[#131315]">
+        <div className="px-5 pt-4 pb-2.5 flex items-start justify-between border-b border-black/5 dark:border-white/5 shrink-0 bg-[#fcfbf9] dark:bg-[#131315]">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[11px] font-semibold text-black/70 dark:text-white/70 mb-1.5">
               <Sparkles className="h-3 w-3 text-amber-500" />
@@ -93,7 +93,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
         </div>
 
         {/* Cuerpo deslizante si es necesario en pantallas cortas */}
-        <div className="p-5 sm:p-6 space-y-4 overflow-y-auto no-scrollbar flex-1 min-h-0">
+        <div className="p-3.5 sm:p-5 space-y-3 overflow-y-auto no-scrollbar flex-1 min-h-0">
           {/* Tarjeta de Racha de Lectura Activa */}
           <div className="rounded-2xl border border-black/5 dark:border-white/5 bg-[#f5f4ef] dark:bg-[#1c1b1d] p-4 text-left shadow-xs">
             <div className="flex items-center justify-between mb-2">
