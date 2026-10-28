@@ -208,6 +208,15 @@ Registro cronologico de sesiones, hitos alcanzados, decisiones arquitectonicas y
   * Ajuste de persistencia de bienvenida: se retiro el bloqueo estricto de 24 horas por fecha fija (`biblia_welcome_dismissed_date`) para que el modal se inicialice al abrir o recargar la aplicacion y permanezca accesible bajo demanda en cualquier momento mediante el boton de inicio.
   * Compilacion validada sin errores en TypeScript y Vite.
 
+* **Limpieza de Pantalla en Scroll Descendente y Tipado Cross-Platform (Hito 6.17 - Rama feature/immersive-scroll-clean-ts-fix)**:
+  * Creacion de la rama de trabajo `feature/immersive-scroll-clean-ts-fix`.
+  * Correccion del error de compilacion TypeScript TS2503 (`No se encuentra el espacio de nombres 'NodeJS'`) en `src/components/organisms/VerseCard.tsx` y `src/pages/FeedPage.tsx` mediante el uso de `ReturnType<typeof setTimeout>`, garantizando compatibilidad nativa en entornos de ejecucion cliente y DOM.
+  * Implementacion de lectura inmersiva continua con deteccion de direccion de desplazamiento vertical (`handleFeedScroll` con `lastScrollTopRef`):
+    * Desplazamiento hacia abajo (lectura consecutiva de versiculos): la pantalla se mantiene 100% limpia ocultando de inmediato el HUD (`TopBar` y `VerseActionBar`) y cancelando temporizadores residuales.
+    * Desplazamiento hacia arriba (retroceso o busqueda de herramientas): el HUD se activa automaticamente para facilitar la navegacion y se auto-oculta tras 3.5 segundos de inactividad.
+    * Toque simple de pantalla: conmutacion manual del HUD para mayor flexibilidad del lector.
+  * Compilacion validada sin errores en TypeScript y Vite.
+
 #### Decisiones Tomadas (ADRs Rapidos)
 * **ADR-001 (Atomic Design Pragmatico):** No crear atomos wrapper innecesarios. Usar Tailwind y HTML nativo cuando sea suficiente; crear componentes solo cuando haya logica, accesibilidad o composicion reutilizable.
 * **ADR-002 (Seguridad Supabase):** RLS habilitado en el 100% de las tablas; autenticacion anonima progresiva para permitir uso inmediato sin registro forzado.

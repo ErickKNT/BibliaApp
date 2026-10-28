@@ -86,7 +86,8 @@ export const FeedPage: React.FC = () => {
 
   // Modo Lectura Inmersiva Total (Auto-Hide HUD)
   const [isHudVisible, setIsHudVisible] = useState<boolean>(true);
-  const hideHudTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hideHudTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastScrollTopRef = useRef<number>(0);
 
   const isAnyModalOpen =
     isExplorerOpen ||
@@ -293,17 +294,35 @@ export const FeedPage: React.FC = () => {
 
     cards.forEach((card) => observer.observe(card));
 
-    const handleFeedActivity = () => {
-      resetHudTimer(true);
+    const handleFeedScroll = () => {
+      const currentScrollTop = container.scrollTop;
+      const diff = currentScrollTop - lastScrollTopRef.current;
+
+      // Umbral minimo para descartar micro-movimientos o rebotes imperceptibles
+      if (Math.abs(diff) < 10) return;
+
+      if (diff > 0) {
+        // Desplazamiento hacia abajo (avanzando en la lectura):
+        // Mantener la pantalla completamente limpia sin HUD
+        setIsHudVisible(false);
+        if (hideHudTimeoutRef.current) {
+          clearTimeout(hideHudTimeoutRef.current);
+          hideHudTimeoutRef.current = null;
+        }
+      } else {
+        // Desplazamiento hacia arriba (retroceso o busqueda de controles):
+        // Mostrar HUD y reiniciar temporizador de auto-ocultado
+        resetHudTimer(true);
+      }
+
+      lastScrollTopRef.current = currentScrollTop;
     };
 
-    container.addEventListener('scroll', handleFeedActivity, { passive: true });
-    container.addEventListener('touchstart', handleFeedActivity, { passive: true });
+    container.addEventListener('scroll', handleFeedScroll, { passive: true });
 
     return () => {
       observer.disconnect();
-      container.removeEventListener('scroll', handleFeedActivity);
-      container.removeEventListener('touchstart', handleFeedActivity);
+      container.removeEventListener('scroll', handleFeedScroll);
     };
   }, [verses, resetHudTimer]);
 

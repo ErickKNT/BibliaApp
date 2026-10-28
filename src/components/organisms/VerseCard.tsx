@@ -22,7 +22,7 @@ export const VerseCard: React.FC<VerseCardProps> = ({
 }) => {
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const [lastTap, setLastTap] = useState<number>(0);
-  const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Distinguir entre toque simple (conmutar HUD) y doble toque (dar Me gusta)
   const handleTap = (e: React.MouseEvent) => {
